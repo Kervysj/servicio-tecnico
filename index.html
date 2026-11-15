@@ -1,0 +1,659 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Portal de comandos de Windows</title>
+<style>
+:root{--bg:#f6f7f9;--card:#fff;--tx:#1b1f24;--mu:#5d6773;--bd:#dde1e6;--ac:#0b6bcb;--acx:#fff;--cd:#0f1720;--cdt:#d6e4f0;--ok:#1a7f45;--md:#a96a00;--bad:#b3261e;color-scheme:light;box-sizing:border-box;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#10141a;--card:#1a2029;--tx:#e8ecf1;--mu:#9aa6b2;--bd:#2c3541;--ac:#4aa3ff;--acx:#06121f;--cd:#0a0e13;--cdt:#cfe3f5;--ok:#4cc27f;--md:#e0a030;--bad:#ff8a80;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#10141a;--card:#1a2029;--tx:#e8ecf1;--mu:#9aa6b2;--bd:#2c3541;--ac:#4aa3ff;--acx:#06121f;--cd:#0a0e13;--cdt:#cfe3f5;--ok:#4cc27f;--md:#e0a030;--bad:#ff8a80;color-scheme:dark}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:16px/1.5 system-ui,-apple-system,Segoe UI,Roboto,sans-serif}
+header,main{max-width:900px;margin:0 auto;padding:16px}
+h1{font-size:1.5rem;margin:.2em 0}
+.sub{color:var(--mu);margin:0 0 12px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0 14px}
+.tab,.chip,button{font:inherit;cursor:pointer;border:1px solid var(--bd);background:var(--card);color:var(--tx);border-radius:10px;padding:8px 12px}
+.tab[aria-selected="true"],.chip[aria-pressed="true"]{background:var(--ac);color:var(--acx);border-color:var(--ac)}
+.chips{display:flex;gap:6px;flex-wrap:wrap;margin:8px 0}
+.chip{padding:4px 10px;font-size:.85rem;border-radius:99px}
+input,select,textarea{font:inherit;width:100%;padding:9px 10px;border:1px solid var(--bd);border-radius:10px;background:var(--card);color:var(--tx)}
+.card{background:var(--card);border:1px solid var(--bd);border-radius:12px;padding:14px;margin:10px 0}
+.card h3{margin:0 0 4px;font-size:1.05rem}
+.note{color:var(--mu);margin:0 0 8px;font-size:.93rem}
+pre{background:var(--cd);color:var(--cdt);padding:10px;border-radius:8px;overflow-x:auto;margin:0 0 8px;font:13px/1.45 ui-monospace,Consolas,monospace;white-space:pre-wrap;word-break:break-word}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.tag{font-size:.75rem;color:var(--mu);border:1px solid var(--bd);border-radius:99px;padding:1px 8px}
+.r-seguro{color:var(--ok)}.r-medio{color:var(--md)}.r-cuidado{color:var(--bad)}
+.badge{font-size:.78rem;font-weight:600}
+.warn{border-left:4px solid var(--md);background:var(--card);padding:10px 12px;border-radius:8px;margin:10px 0;font-size:.92rem}
+.grid{display:grid;gap:10px;grid-template-columns:repeat(auto-fit,minmax(200px,1fr))}
+label{font-size:.85rem;color:var(--mu);display:block;margin-bottom:3px}
+.cp{margin-left:auto;background:var(--ac);color:var(--acx);border-color:var(--ac);padding:5px 12px}
+.hid{display:none}
+.where{font-weight:700;font-size:.8rem;padding:2px 10px;border-radius:6px;background:var(--cd);color:var(--cdt)}
+.bi{display:flex;gap:10px;align-items:flex-start;padding:8px 10px;border:1px solid var(--bd);background:var(--card);border-radius:10px;margin:6px 0;color:var(--tx);font-size:1rem}.bi input{width:auto;margin-top:5px}
+.lv{display:inline-block;padding:2px 10px;border-radius:99px;font-weight:700;font-size:.85rem;background:var(--ac);color:var(--acx)}
+h1,#list h2,.where,.lvl{font-family:ui-monospace,Consolas,monospace}
+h1{letter-spacing:-.5px}
+.card{border-left:4px solid var(--ok)}.card.k-medio{border-left-color:var(--md)}.card.k-cuidado{border-left-color:var(--bad)}
+.where{letter-spacing:.5px}.where.ps{background:#012456;color:#fff}.where.cmd{background:#000;color:#e6e6e6;border:1px solid #666}
+.lvl{font-size:.72rem;font-weight:700;padding:1px 8px;border-radius:6px;border:1px solid var(--bd);color:var(--mu)}.lvl.l1{color:var(--ok);border-color:var(--ok)}.lvl.l2{color:var(--md);border-color:var(--md)}.lvl.l3{color:var(--bad);border-color:var(--bad)}
+#list h2{text-transform:uppercase;font-size:.95rem!important;letter-spacing:1px;color:var(--ac)}
+.pb{display:flex;gap:8px;align-items:center;flex-wrap:wrap;border:1px dashed var(--ac);border-radius:10px;padding:8px 10px;margin:8px 0;font-size:.9rem}
+table.dc{width:100%;border-collapse:collapse;font-size:.92rem}.dc td{border-bottom:1px solid var(--bd);padding:5px 6px;vertical-align:top}.dc td:first-child{font:600 .85rem ui-monospace,Consolas,monospace;white-space:nowrap;color:var(--ac)}.dc .dg{color:var(--bad);font-weight:600}
+.tj{border:2px solid var(--ac);border-radius:16px;overflow:hidden;background:var(--card);margin:10px 0}
+.tjh{padding:16px;background:linear-gradient(135deg,#0b6bcb,#7a3fd1 60%,#c2307a);color:#fff}.tjk{font:700 .78rem ui-monospace,Consolas,monospace;letter-spacing:1px;opacity:.9;margin-bottom:6px}
+.score{font-size:2.6rem;font-weight:800;line-height:1}.stars{font-size:1.4rem;letter-spacing:2px;color:#ffd54a}.tjh .lv{background:#fff;color:#1b1f24}
+.mc{border:2px solid;border-radius:12px;padding:10px}.mct{font-size:.8rem;color:var(--mu)}.mcv{font-weight:700;word-break:break-word}.mcs{font:700 .85rem ui-monospace,Consolas,monospace;margin-top:4px}
+.st-g{border-color:var(--ok);background:color-mix(in srgb,var(--ok) 13%,var(--card))}.st-g .mcs{color:var(--ok)}
+.st-a{border-color:var(--md);background:color-mix(in srgb,var(--md) 13%,var(--card))}.st-a .mcs{color:var(--md)}
+.st-r{border-color:var(--bad);background:color-mix(in srgb,var(--bad) 13%,var(--card))}.st-r .mcs{color:var(--bad)}
+.sec{padding:12px 16px;border-top:1px solid var(--bd)}.sec h4{margin:0 0 6px;font-size:1rem}.so{background:color-mix(in srgb,var(--ok) 10%,var(--card))}
+.bar{height:8px;border-radius:99px;background:var(--bd);overflow:hidden;margin:2px 0 8px}.bar i{display:block;height:100%}
+.uc{display:inline-block;margin:3px;padding:3px 10px;border-radius:99px;border:1px solid;font-size:.85rem}.uc2{color:var(--ok)}.uc1{color:var(--md)}.uc0{color:var(--bad)}
+.wt-grid{display:grid;gap:8px;grid-template-columns:repeat(auto-fill,minmax(125px,1fr));margin:12px 0}
+.wt{display:flex;flex-direction:column;align-items:center;gap:2px;padding:10px 6px;text-align:center;border-radius:14px;border:2px solid var(--bd);background:var(--card)}
+.wt .ic{font-size:1.7rem;line-height:1.2}.wt b{font-size:.85rem}.wt small{color:var(--mu);font-size:.75rem}
+.wt[aria-pressed="true"]{border-color:var(--cc,var(--ac));background:color-mix(in srgb,var(--cc,var(--ac)) 16%,var(--card))}
+.wh{display:flex;align-items:center;gap:8px;font-size:1.05rem;margin:22px 0 10px;padding-bottom:6px;border-bottom:3px solid var(--cc);color:var(--cc);text-transform:uppercase;letter-spacing:1px;font-family:ui-monospace,Consolas,monospace}
+.wh span{font-size:1.4rem}.wh small{color:var(--mu);font-weight:400;margin-left:auto}
+.wg{display:grid;gap:12px;grid-template-columns:repeat(auto-fill,minmax(250px,1fr))}
+.wcard{display:flex;flex-direction:column;gap:8px;background:var(--card);border:1px solid var(--bd);border-top:6px solid var(--cc);border-radius:16px;padding:14px}
+.wtop{display:flex;gap:12px;align-items:center}
+.wic{flex:none;width:52px;height:52px;border-radius:14px;display:flex;align-items:center;justify-content:center;font-size:1.8rem;background:color-mix(in srgb,var(--cc) 18%,var(--card))}
+.wcard h3{margin:0;font-size:1.05rem;line-height:1.25}.wdom{color:var(--mu);font-size:.78rem;word-break:break-all}
+.wsum{flex:1;margin:0;font-size:.93rem}
+.wact{display:flex;gap:6px}.lk{flex:1;text-align:center;text-decoration:none;background:var(--cc);color:#fff;border-radius:10px;padding:9px 12px;font-weight:700;font-size:.93rem}
+.wbadge{align-self:flex-start;font-size:.72rem;font-weight:700;color:var(--cc);border:1px solid var(--cc);border-radius:99px;padding:1px 8px}
+details.wadd{border:2px dashed var(--ac);border-radius:14px;padding:10px 14px;margin:8px 0}details.wadd summary{cursor:pointer;font-weight:700;color:var(--ac)}
+.wwarn{font-size:.85rem;border-left:4px solid var(--md);padding:6px 10px;border-radius:6px;background:color-mix(in srgb,var(--md) 10%,var(--card))}
+details.wsteps summary{cursor:pointer;color:var(--cc);font-weight:700;font-size:.93rem}.wsteps ol{margin:8px 0 0 18px;padding:0;font-size:.9rem}.wsteps li{margin:5px 0}
+.wcard pre{margin:0;font-size:12px}.wauto{font-size:.85rem;color:var(--ok);margin:8px 0 0}.wcard{position:relative}.wcard .wtop{padding-right:30px}.wx{position:absolute;top:8px;right:8px;width:28px;height:28px;padding:0;border-radius:50%;line-height:1;font-size:1rem;color:var(--mu)}.wx:hover{color:var(--bad);border-color:var(--bad)}
+.wbest{align-self:flex-start;font-size:.75rem;font-weight:700;background:var(--cc);color:#fff;border-radius:99px;padding:2px 10px}
+.wsug{font-size:1.05rem;margin:16px 0 10px}
+</style>
+</head>
+<body>
+<header>
+<h1>🧰 Portal de comandos de Windows</h1>
+<p class="sub">Comandos ordenados por categoría y por nivel (básico → avanzado). Cada uno indica dónde correrlo y, si hay riesgo, por qué.</p>
+<div class="tabs" role="tablist">
+<button class="tab" role="tab" data-v="mi" aria-selected="true">Analizar mi equipo</button>
+<button class="tab" role="tab" data-v="ps" aria-selected="false">PowerShell</button>
+<button class="tab" role="tab" data-v="cmd" aria-selected="false">CMD</button>
+<button class="tab" role="tab" data-v="dic" aria-selected="false">Diccionario CMD</button>
+<button class="tab" role="tab" data-v="bloat" aria-selected="false">Quitar bloatware</button>
+<button class="tab" role="tab" data-v="ini" aria-selected="false">Gestionar inicio</button>
+<button class="tab" role="tab" data-v="apps" aria-selected="false">Apps gratis</button>
+<button class="tab" role="tab" data-v="web" aria-selected="false">Páginas interesantes</button>
+</div>
+</header>
+<main>
+<section id="v-cmds">
+<div class="warn" id="warn"></div>
+<input id="q" type="search" placeholder="Buscar: bloatware, ram, disco, inicio...">
+<div id="pbar"></div>
+<div class="chips" id="lvs"></div>
+<div class="chips" id="chips"></div>
+<div id="list"></div>
+</section>
+
+<section id='v-dic' class='hid'><div class='warn'>Referencia de CMD: haz clic en el nombre o en Copiar para copiar el ejemplo al instante. Filtra por etiqueta, mira para qué sirve y copia el ejemplo en CMD (Win+R → cmd → Enter). Cambia los nombres de ejemplo por los tuyos. Los marcados con ⚠ pueden borrar datos o dañar el sistema: el motivo va al lado.</div><input id='dq' type='search' placeholder='Buscar: copiar, disco, red...'><div class='chips' id='dchips'></div><div id='dlist'></div></section>
+
+<section id='v-bloat' class='hid'>
+<div class='warn'>Abre PowerShell como administrador. Marca lo que quieres quitar y copia el script. Se puede reinstalar desde la Microsoft Store. No quites la Store, la Calculadora, Fotos ni Configuración.</div>
+<div class='row' style='margin:8px 0'><button id='bsafe'>Marcar los recomendados</button><button id='bnone'>Desmarcar todo</button><button id='ball'>Marcar todo</button></div>
+<div class='row' style='margin:8px 0'><label for='bver' style='margin:0'>Tu Windows:</label><select id='bver' style='width:auto'><option value='w10'>Windows 10</option><option value='w11'>Windows 11</option></select></div>
+<div id='blist'></div>
+<div class='card'><h3>Tu script de PowerShell</h3><pre id='bout'></pre><button id='bcp' class='cp' style='margin-left:0'>Copiar script</button></div>
+<div id='bextra'></div>
+</section>
+
+<section id='v-mi'>
+<div class='card'><h3>Empecemos: cuéntame de tu equipo</h3><p class='note'>Llena todo una sola vez y te armo un informe técnico con palabras sencillas: estado de tu PC, qué sistema operativo te conviene, qué mejorar y qué comandos usar.</p>
+<div class='grid'>
+<div><label for='eq'>Tipo de equipo</label><select id='eq'><option value=''>Elige...</option><option value='pc'>PC de escritorio</option><option value='lap'>Laptop</option></select></div>
+<div><label for='mwin'>Windows que tienes ahora</label><select id='mwin'><option value=''>Elige...</option><option value='7'>Windows 7</option><option value='8'>Windows 8 / 8.1</option><option value='10'>Windows 10</option><option value='11'>Windows 11</option><option value='x'>No sé</option></select></div>
+<div><label for='cpu'>Procesador</label><select id='cpu'></select></div>
+<div><label for='ram'>Memoria RAM</label><select id='ram'><option value='2'>2 GB o menos</option><option value='4'>4 GB</option><option value='8' selected>8 GB</option><option value='12'>12 GB</option><option value='16'>16 GB</option><option value='32'>32 GB o más</option></select></div>
+<div><label for='dsk'>Tipo de disco</label><select id='dsk'><option value=''>Elige...</option><option value='ssd'>Sólido (SSD)</option><option value='hdd'>Mecánico (HDD)</option><option value='nose'>No sé</option></select></div>
+<div><label for='us'>Para qué lo usas más</label><select id='us'><option value='oficina'>Internet y oficina</option><option value='estudio'>Estudio</option><option value='juegos'>Juegos</option><option value='diseno'>Diseño y edición</option><option value='programar'>Programar</option></select></div>
+<div><label for='nw'>¿Necesitas programas solo de Windows?</label><select id='nw'><option value='no'>No</option><option value='win'>Sí</option></select></div>
+</div>
+<div class='warn'><b>Paso 1: averigua tus datos.</b> Abre CMD (Win+R → cmd → Enter), pega esto y compara con las listas de arriba. El número después del guion indica la generación (i5-8250U → generación 8). En la RAM, 8589934592 = 8 GB.<pre id='cpucmd' style='margin-top:6px'>:: Procesador
+wmic cpu get name
+:: Memoria RAM (en bytes)
+wmic memorychip get capacity
+:: Disco (MediaType: SSD o HDD)
+powershell -command "Get-PhysicalDisk | Select FriendlyName,MediaType"
+:: Windows actual
+ver
+:: Si wmic no existe en tu Windows:
+powershell -command "Get-CimInstance Win32_Processor | Select Name"</pre><button id='cpucp' class='cp' style='margin-left:0'>Copiar comandos</button></div>
+<div class='row' style='margin-top:10px'><button id='go' class='cp' style='margin-left:0'>Generar informe técnico</button><button id='rst2'>Reiniciar y elegir otras características</button></div></div>
+<div id='rep' class='card hid'></div>
+</section>
+
+<section id='v-ini' class='hid'>
+<div class='card'><h3>Paso 1: copia la lista de tu PC</h3><p class='note'>Abre PowerShell, pega este comando y presiona Enter. Copia la lista automáticamente.</p><div id='ini1'></div></div>
+<div class='card'><h3>Paso 2: pega aquí la lista</h3><textarea id='ipaste' rows='5' placeholder='Pega aquí con Ctrl + V...'></textarea><p class='note'>Una captura de pantalla no se puede pegar aquí: usa el comando del paso 1. Si solo tienes la captura, súbela en el chat con Claude y te arma el script.</p><button id='igo' class='cp' style='margin-left:0'>Analizar</button></div>
+<div id='iout' class='hid'>
+<p id='isum' class='note'></p>
+<div class='row' style='margin:8px 0'><button id='irec'>Marcar los recomendados</button><select id='imode' style='width:auto'><option value='3'>Quitar del inicio</option><option value='2'>Volver a activar</option></select></div>
+<div id='icards'></div>
+<div class='card'><h3>Paso 3: tu script</h3><p class='note'>Pégalo en PowerShell como administrador y luego reinicia. No desinstala nada: solo evita que arranque con Windows.</p><pre id='iscript'></pre><button id='icp' class='cp' style='margin-left:0'>Copiar script</button></div>
+</div>
+</section>
+
+
+
+<section id="v-apps" class="hid">
+<div class="card">
+<h3>Tus apps gratis y eficientes</h3>
+<p class="note">Aquí guardas las apps que quieras tener a mano. Se guardan solo en este navegador.</p>
+<div class="grid">
+<div><label for="an">Nombre</label><input id="an"></div>
+<div><label for="al">Enlace (https://...)</label><input id="al" inputmode="url"></div>
+<div><label for="ad">Para qué sirve</label><input id="ad"></div>
+</div>
+<p><button id="aadd" class="cp" style="margin:8px 0 0">Agregar app</button></p>
+</div>
+<div id="alist"></div>
+</section>
+<section id="v-web" class="hid">
+<input id="wq" type="search" placeholder="🔍 Escribe qué quieres hacer: arreglar una foto, pasar PDF a Word, enviar un archivo...">
+<div class="chips" id="wex"></div>
+<div class="wt-grid" id="wchips"></div>
+<details class="wadd" open><summary>➕ Añadir URL</summary>
+<p class="note" style="margin-top:8px">Pega una o varias direcciones (una por línea o separadas por espacios). Averiguo de qué trata cada una y la organizo en tarjetones.</p>
+<textarea id="wbulk" rows="4" placeholder="https://...&#10;https://...&#10;https://..."></textarea>
+<p style="margin:8px 0 0"><button id="wbulkgo" class="cp" style="margin:0">✨ Añadir y organizar</button></p>
+<div id="wbst" class="wauto" style="margin:8px 0 0"></div>
+<details style="margin-top:12px"><summary>✏️ Añadir una sola a mano</summary>
+<p class="note" style="margin-top:8px">Pega el enlace primero: el nombre, la categoría y el icono se rellenan solos. Puedes corregirlos.</p>
+<div class="grid">
+<div><label for="wl">Enlace (https://...)</label><input id="wl" inputmode="url"></div>
+<div><label for="wn">Nombre</label><input id="wn"></div>
+<div><label for="wc">Categoría</label><select id="wc"></select></div>
+<div id="wcnb" class="hid"><label for="wcn">Nombre de la nueva categoría</label><input id="wcn"></div>
+<div><label for="we">Icono (un emoji, opcional)</label><input id="we" maxlength="4" placeholder="🌐"></div>
+</div>
+<div id="wauto" class="wauto hid"></div>
+<div style="margin-top:8px"><label for="wd">Resumen corto (qué hace)</label><input id="wd" maxlength="200"></div>
+<p><button id="wadd" class="cp" style="margin:8px 0 0">Agregar página</button></p>
+</details>
+<p class="note">Se guardan solo en este navegador.</p>
+</details>
+<div id="wlist"></div>
+</section>
+</main>
+
+<script>
+var C=[
+// PowerShell
+{t:"Crear punto de restauración (hazlo primero)",n:"Guarda una foto del estado de Windows para poder volver atrás si algo sale mal. Necesita que la protección del sistema esté activa.",c:'Checkpoint-Computer -Description "Antes de optimizar" -RestorePointType MODIFY_SETTINGS',g:["Seguridad"],k:"seguro",a:1,p:"ps"},
+{t:"Plan de energía de alto rendimiento",n:"Hace que el equipo no se frene para ahorrar energía. En laptop gasta más batería.",c:"powercfg /setactive 8c5e7fda-e8bf-4a96-9a85-a6e23a8c635c",g:["Rendimiento","Batería"],k:"seguro",a:0,p:"ps"},
+{t:"Ver los programas que arrancan con Windows",n:"Lista lo que se abre al encender. Mientras más cosas, más lento el arranque.",c:"Get-CimInstance Win32_StartupCommand | Select-Object Name,Command,Location | Format-Table -AutoSize",g:["Inicio","Información"],k:"seguro",a:0,p:"ps"},
+{t:"Ver los 10 procesos que más CPU gastan",n:"Te dice qué programas están cargando más el procesador ahora mismo.",c:"Get-Process | Sort-Object CPU -Descending | Select-Object -First 10 Name,CPU,@{n='RAM_MB';e={[int]($_.WS/1MB)}}",g:["Rendimiento","Información"],k:"seguro",a:0,p:"ps"},
+{t:"Ver las apps de Microsoft instaladas",n:"Lista todas las apps de la tienda, para saber cuáles quitar.",c:"Get-AppxPackage | Select-Object Name | Sort-Object Name",g:["Bloatware","Información"],k:"seguro",a:0,p:"ps"},
+{t:"Quitar apps de relleno (noticias, clima, solitario, etc.)",n:"Desinstala apps que casi nadie usa. Se pueden volver a bajar de la Microsoft Store.",c:"$apps='Microsoft.BingNews','Microsoft.BingWeather','Microsoft.GetHelp','Microsoft.Getstarted','Microsoft.MicrosoftSolitaireCollection','Microsoft.WindowsFeedbackHub','Microsoft.MicrosoftOfficeHub','Microsoft.People'\nforeach($a in $apps){Get-AppxPackage -Name $a | Remove-AppxPackage}",g:["Bloatware"],k:"medio",a:0,p:"ps"},
+{t:"Quitar Groove Música, Películas y Tu Teléfono",n:"Quita reproductores de Microsoft y el enlace con el celular. Salta este si usas el enlace con tu teléfono.",c:"'Microsoft.ZuneMusic','Microsoft.ZuneVideo','Microsoft.YourPhone' | ForEach-Object { Get-AppxPackage -Name $_ | Remove-AppxPackage }",g:["Bloatware"],k:"medio",a:0,p:"ps"},
+{t:"Apagar apps en segundo plano",n:"Evita que las apps de la tienda trabajen escondidas gastando RAM y datos.",c:'Set-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\BackgroundAccessApplications" -Name GlobalUserDisabled -Value 1 -Type DWord',g:["Rendimiento","Bloatware"],k:"seguro",a:0,p:"ps"},
+{t:"Quitar sugerencias y publicidad de Windows",n:"Apaga los anuncios en el menú Inicio y las sugerencias de apps.",c:'$p="HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager"\nforeach($n in "SystemPaneSuggestionsEnabled","SubscribedContent-338388Enabled","SubscribedContent-338389Enabled","SoftLandingEnabled"){Set-ItemProperty -Path $p -Name $n -Value 0 -Type DWord}',g:["Privacidad","Bloatware"],k:"seguro",a:0,p:"ps"},
+{t:"Desactivar el ID de publicidad",n:"Impide que las apps te sigan con un identificador para mostrar anuncios.",c:'Set-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo" -Name Enabled -Value 0 -Type DWord',g:["Privacidad"],k:"seguro",a:0,p:"ps"},
+{t:"Desactivar telemetría (DiagTrack)",n:"Apaga el servicio que envía datos de uso a Microsoft. Libera algo de CPU y disco.",c:"Stop-Service DiagTrack -Force; Set-Service DiagTrack -StartupType Disabled",g:["Privacidad","Servicios"],k:"medio",a:1,p:"ps"},
+{t:"Desactivar Xbox Game Bar y grabación",n:"Apaga la barra de juegos y la captura en segundo plano. Útil si no juegas.",c:'Set-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\GameDVR" -Name AppCaptureEnabled -Value 0 -Type DWord',g:["Rendimiento","Bloatware"],k:"seguro",a:0,p:"ps"},
+{t:"Desactivar servicios de Xbox",n:"Apaga los servicios de Xbox que corren sin que los uses. Déjalos si juegas con Xbox o Game Pass.",c:"'XblAuthManager','XblGameSave','XboxNetApiSvc' | ForEach-Object { Stop-Service $_ -Force -ErrorAction SilentlyContinue; Set-Service $_ -StartupType Disabled }",g:["Servicios","Bloatware"],k:"medio",a:1,p:"ps"},
+{t:"Desactivar SysMain (Superfetch)",n:"Ayuda en discos mecánicos, pero en un SSD sobra y gasta recursos. Hazlo solo si tienes SSD.",c:"Stop-Service SysMain -Force; Set-Service SysMain -StartupType Disabled",g:["Servicios","Rendimiento","Disco"],k:"medio",a:1,p:"ps"},
+{t:"Desactivar la indexación de búsqueda",n:"Windows deja de catalogar tus archivos. Ahorra disco, pero las búsquedas serán más lentas.",c:"Stop-Service WSearch -Force; Set-Service WSearch -StartupType Disabled",g:["Servicios","Disco"],k:"cuidado",a:1,p:"ps"},
+{t:"Desactivar hibernación",n:"Borra el archivo hiberfil.sys y libera varios GB. Pierdes el apagado rápido y la hibernación.",c:"powercfg /hibernate off",g:["Disco","Limpieza"],k:"medio",a:1,p:"ps"},
+{t:"Menos efectos visuales",n:"Quita animaciones y sombras para que se sienta más rápido. Cierra sesión para ver el cambio.",c:'Set-ItemProperty -Path "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\VisualEffects" -Name VisualFXSetting -Value 2 -Type DWord',g:["Rendimiento"],k:"seguro",a:0,p:"ps"},
+{t:"Borrar archivos temporales",n:"Elimina basura temporal del usuario. Cierra tus programas antes.",c:'Remove-Item "$env:TEMP\\*" -Recurse -Force -ErrorAction SilentlyContinue',g:["Limpieza","Disco"],k:"seguro",a:0,p:"ps"},
+{t:"Optimizar disco SSD (TRIM)",n:"Le avisa al SSD qué espacio está libre para mantener su velocidad. Solo para SSD.",c:"Optimize-Volume -DriveLetter C -ReTrim -Verbose",g:["Disco","Rendimiento"],k:"seguro",a:1,p:"ps"},
+{t:"Desfragmentar disco mecánico (HDD)",n:"Ordena los datos del disco mecánico para que lea más rápido. NO uses esto en un SSD.",c:"Optimize-Volume -DriveLetter C -Defrag -Verbose",g:["Disco","Rendimiento"],k:"medio",a:1,p:"ps"},
+{t:"Ver tipo de disco (sólido o mecánico)",n:"Muestra si cada disco es SSD o HDD, su salud y tamaño.",c:"Get-PhysicalDisk | Select-Object FriendlyName,MediaType,HealthStatus,@{n='GB';e={[int]($_.Size/1GB)}}",g:["Información","Disco"],k:"seguro",a:0,p:"ps"},
+// CMD
+{t:"Información completa del equipo",n:"Muestra Windows, RAM, procesador, fecha de instalación y más.",c:"systeminfo",g:["Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Nombre del procesador (CPU)",n:"Dice qué procesador tienes, cuántos núcleos e hilos. Si wmic no existe en tu Windows, usa la línea de PowerShell.",c:"wmic cpu get name,numberofcores,numberoflogicalprocessors\n:: Alternativa:\npowershell -command \"Get-CimInstance Win32_Processor | Select Name,NumberOfCores,NumberOfLogicalProcessors\"",g:["Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Memoria RAM instalada",n:"Muestra cada módulo de RAM con su tamaño en bytes y velocidad.",c:"wmic memorychip get capacity,speed\n:: Alternativa:\npowershell -command \"Get-CimInstance Win32_PhysicalMemory | Select Capacity,Speed\"",g:["Información"],k:"seguro",a:0,p:"cmd"},
+{t:"RAM total en una línea",n:"Rápido: solo la memoria física total y la libre.",c:'systeminfo | findstr /C:"Total Physical Memory" /C:"Available Physical Memory"',g:["Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Tipo de disco: sólido o mecánico",n:"En la columna MediaType verás SSD o HDD.",c:'powershell -command "Get-PhysicalDisk | Select FriendlyName,MediaType,Size"',g:["Información","Disco"],k:"seguro",a:0,p:"cmd"},
+{t:"Tarjeta de video (GPU)",n:"Nombre de tu tarjeta gráfica.",c:"wmic path win32_videocontroller get name\n:: Alternativa:\npowershell -command \"Get-CimInstance Win32_VideoController | Select Name\"",g:["Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Espacio en los discos",n:"Tamaño total y espacio libre de cada unidad.",c:"wmic logicaldisk get caption,size,freespace\n:: Alternativa:\npowershell -command \"Get-PSDrive -PSProvider FileSystem\"",g:["Información","Disco"],k:"seguro",a:0,p:"cmd"},
+{t:"Versión de Windows",n:"Muestra la versión instalada.",c:"ver",g:["Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Reporte de batería (laptop)",n:"Crea un archivo HTML con la salud y el desgaste de la batería.",c:"powercfg /batteryreport",g:["Batería","Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Reparar archivos dañados de Windows",n:"Revisa y arregla archivos del sistema. Tarda unos minutos.",c:"sfc /scannow",g:["Reparar"],k:"seguro",a:1,p:"cmd"},
+{t:"Reparar la imagen de Windows (DISM)",n:"Arregla el almacén de componentes. Úsalo si sfc no pudo reparar todo. Necesita internet.",c:"DISM /Online /Cleanup-Image /RestoreHealth",g:["Reparar"],k:"seguro",a:1,p:"cmd"},
+{t:"Revisar errores del disco",n:"Programa una revisión del disco C: al reiniciar.",c:"chkdsk C: /f",g:["Reparar","Disco"],k:"medio",a:1,p:"cmd"},
+{t:"Probar la memoria RAM",n:"Abre el diagnóstico de memoria de Windows (reinicia el equipo).",c:"mdsched",g:["Reparar","Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Ver la configuración de red (IP)",n:"Muestra tu IP, puerta de enlace y DNS.",c:"ipconfig /all",g:["Red","Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Limpiar la caché DNS",n:"Ayuda cuando una página no abre pero hay internet.",c:"ipconfig /flushdns",g:["Red","Reparar"],k:"seguro",a:0,p:"cmd"},
+{t:"Ver programas abiertos",n:"Lista todos los procesos en ejecución.",c:"tasklist",g:["Rendimiento","Información"],k:"seguro",a:0,p:"cmd"},
+{t:"Abrir el liberador de espacio",n:"Herramienta de Windows para borrar temporales y papelera.",c:"cleanmgr",g:["Limpieza","Disco"],k:"seguro",a:0,p:"cmd"},
+{t:"Abrir información del sistema",n:"Ventana con todos los detalles de hardware y software.",c:"msinfo32",g:["Información"],k:"seguro",a:0,p:"cmd"}
+];
+var view="ps",tag="Todos",$=function(i){return document.getElementById(i)};
+var WARN={ps:"Abre PowerShell como administrador (clic derecho en Inicio → Terminal o PowerShell Admin). Crea primero el punto de restauración. Los de riesgo medio o cuidado conviene leerlos antes.",cmd:"Abre Símbolo del sistema (CMD). Los marcados Admin necesitan ejecutarse como administrador."};
+function copy(txt,b){var done=function(){var o=b.textContent;b.textContent="¡Copiado!";setTimeout(function(){b.textContent=o},1200)};
+try{navigator.clipboard.writeText(txt).then(done,fb)}catch(e){fb()}
+function fb(){var t=document.createElement("textarea");t.value=txt;document.body.appendChild(t);t.select();try{document.execCommand("copy");done()}catch(e){}document.body.removeChild(t)}}
+function el(tg,cls,tx){var e=document.createElement(tg);if(cls)e.className=cls;if(tx!=null)e.textContent=tx;return e}
+function chips(){var box=$("chips");box.textContent="";var set={};C.filter(function(x){return x.p==view}).forEach(function(x){x.g.forEach(function(g){set[g]=1})});
+["Todos"].concat(Object.keys(set).sort()).forEach(function(g){var b=el("button","chip",g);b.setAttribute("aria-pressed",g==tag);b.onclick=function(){tag=g;chips();render()};box.appendChild(b)})}
+function render(){var q=$("q").value.toLowerCase(),L=$("list");L.textContent="";$("warn").textContent=WARN[view];
+C.filter(function(x){return x.p==view&&(tag=="Todos"||x.g.indexOf(tag)>-1)&&(x.t+" "+x.n+" "+x.g.join(" ")).toLowerCase().indexOf(q)>-1}).forEach(function(x){
+var d=el("div","card");d.appendChild(el("h3",0,x.t));d.appendChild(el("p","note",x.n));d.appendChild(el("pre",0,x.c));
+var r=el("div","row");var bd=el("span","badge r-"+x.k,x.k=="seguro"?"✔ Seguro":x.k=="medio"?"● Riesgo medio":"▲ Con cuidado");r.appendChild(bd);
+if(x.a)r.appendChild(el("span","tag","Admin"));x.g.forEach(function(g){r.appendChild(el("span","tag",g))});
+var b=el("button","cp","Copiar");b.onclick=function(){copy(x.c,b)};r.appendChild(b);d.appendChild(r);L.appendChild(d)});
+if(!L.firstChild)L.appendChild(el("p","note","No hay resultados."))}
+function show(v){view=v;tag="Todos";document.querySelectorAll(".tab").forEach(function(t){t.setAttribute("aria-selected",t.dataset.v==v)});
+var cm=v=="ps"||v=="cmd";$("v-cmds").classList.toggle("hid",!cm);$("v-apps").classList.toggle("hid",v!="apps");$('v-bloat').classList.toggle('hid',v!='bloat');$('v-ini').classList.toggle('hid',v!='ini');$('v-mi').classList.toggle('hid',v!='mi');$('v-dic').classList.toggle('hid',v!='dic');if(v=='dic')dicR();$('v-web').classList.toggle('hid',v!='web');if(v=='web')rWeb();
+if(cm){$("q").value="";chips();render()}}
+document.querySelectorAll(".tab").forEach(function(t){t.onclick=function(){show(t.dataset.v)}});
+$("q").oninput=render;
+// Informe
+var lastRep="",CPU=[];
+(function(){var CP=$('cpu'),g=null,G=function(n){g=document.createElement('optgroup');g.label=n;CP.appendChild(g)},A=function(t,y,w,l){var o=el('option',0,t);o.value=CPU.length;CPU.push({t:t,y:y,w:w,l:l});g.appendChild(o)};
+CP.appendChild(new Option('Elige tu procesador...',''));var Y=[0,2010,2011,2012,2013,2014,2015,2016,2017,2018,2019,2020,2021,2022,2023],YR=[0,2017,2018,2019,2020,2021,2022,2022,2024,2024];
+[['i3',2],['i5',3],['i7',4],['i9',4]].forEach(function(f){G('Intel Core '+f[0]);for(var n=(f[0]=='i9'?9:1);n<=14;n++)A('Core '+f[0]+' · '+n+'.ª gen · '+Y[n]+' (modelos '+f[0]+'-'+(n==1?'5xx/7xx':n+'xxx')+')',Y[n],n>=8?1:0,f[1])});
+G('Intel Core Ultra');A('Core Ultra 5/7/9 · serie 1 · 2023',2023,1,4);A('Core Ultra serie 2 (200) · 2024',2024,1,4);
+G('Intel Pentium, Celeron, Atom');A('Intel N100 / N95 / N200 · 2023',2023,1,2);A('Celeron / Pentium Silver / Gold N4xxx-N6xxx · 2018+',2018,1,1);A('Pentium G / Dual-Core · 2010-2015',2013,0,1);A('Celeron antiguo (G, B, 8xx) · 2010-2016',2013,0,1);A('Atom · 2008-2015',2012,0,1);A('Core M · 2014-2016',2015,0,1);A('Pentium 4 / Pentium D · 2002-2008',2005,0,1);A('Core 2 Duo / Core 2 Quad · 2006-2010',2008,0,1);
+G('Intel Xeon');A('Xeon E3 / E5 · 2012-2016',2014,0,3);A('Xeon W / Scalable · 2017+',2019,1,4);
+[['3',2],['5',3],['7',4],['9',4]].forEach(function(f){G('AMD Ryzen '+f[0]);for(var q=(f[0]=='9'?3:1);q<=9;q++)A('Ryzen '+f[0]+' · serie '+q+'000 · '+YR[q]+' (ej. Ryzen '+f[0]+' '+q+'xxx)',YR[q],q>=2?1:0,f[1])});
+G('AMD Ryzen AI y Threadripper');A('Ryzen AI 300 · 2024',2024,1,4);A('Ryzen Threadripper · 2017+',2019,1,4);
+G('AMD antiguos');A('Athlon 3000G / Athlon Silver / Gold · 2019+',2019,1,1);A('Athlon X4 / Athlon II / Sempron · 2009-2016',2012,0,1);A('APU A4 / A6 · 2011-2016',2013,0,1);A('APU A8 / A10 / A12 · 2012-2017',2014,0,2);A('FX (FX-4xxx a FX-9xxx) · 2011-2016',2013,0,2);A('Phenom / Phenom II · 2008-2012',2010,0,1);A('AMD E1 / E2 / C-series · 2011-2014',2012,0,1);
+G('Qualcomm (Windows en ARM)');A('Snapdragon X Elite / Plus · 2024',2024,1,3);A('Snapdragon 7c / 8cx · 2019-2021',2020,1,1);
+G('Otro');A('No está en la lista / no sé',2016,-1,2);
+})();
+function resetAll(){["eq","mwin","cpu","dsk"].forEach(function(i){$(i).value=""});$("ram").value="8";$("us").value="oficina";$("nw").value="no";PROF={};$("rep").classList.add("hid");$("rep").textContent=""}
+function report(){var Rr=$("rep"),eq=$("eq").value,w=$("mwin").value,ci=$("cpu").value,ram=+$("ram").value,dk=$("dsk").value,us=$("us").value,nd=$("nw").value;
+Rr.classList.remove("hid");Rr.textContent="";
+if(!eq||!w||ci===""||!dk){Rr.appendChild(el("p","warn","Falta elegir: tipo de equipo, Windows, procesador y disco."));return}
+var c=CPU[+ci],age=2026-c.y,old=(w=="7"||w=="8");PROF={eq:eq,win:w,dk:dk};
+var WL={7:"Windows 7",8:"Windows 8 / 8.1",10:"Windows 10",11:"Windows 11",x:"No indicado"},WS={7:"Terminó su soporte en enero de 2020: no recibe parches de seguridad. Es un riesgo real para banca, correo y contraseñas.",8:"Windows 8.1 terminó su soporte en enero de 2023: sin parches de seguridad.",10:"Terminó el soporte gratuito en octubre de 2025. Revisa en Microsoft qué opciones hay hoy.",11:"Sigue con soporte y actualizaciones.",x:"No sabes tu versión: en CMD escribe ver o winver."},UL2={oficina:"Internet y oficina",estudio:"Estudio",juegos:"Juegos",diseno:"Diseño y edición",programar:"Programar"};
+var lv=c.l;if(c.y<=2012)lv-=2;else if(c.y<=2016)lv-=1;lv=Math.max(1,lv);
+var rl=ram<=2?0:ram<=4?1:ram<=8?2:ram<=16?3:4,dl=dk=="ssd"?3:dk=="hdd"?1:2,sc=(lv+rl+dl)/3,lvl=sc<1.5?"Bajo":sc<2.4?"Justo":sc<3.2?"Bueno":"Muy bueno";
+var H=function(t){var h=el("h3",0,t);h.style.cssText="margin-top:16px;border-bottom:1px solid var(--bd);padding-bottom:3px;text-transform:uppercase;font-size:.95rem;color:var(--ac)";Rr.appendChild(h)},LS=function(a,tg){var u=el(tg||"ul");a.forEach(function(x){u.appendChild(el("li",0,x))});Rr.appendChild(u)};
+var vold=c.y<=2011||ram<=2||(lv<=1&&ram<=4&&c.y<=2015),W=[],A=[],m;
+if(c.w==1&&ram>=8&&!vold){m="Windows 11 (instalación limpia y optimizada)";W.push("Tu procesador ("+c.y+") está en la lista de Windows 11 y tienes RAM suficiente.","Confirma también TPM 2.0 y Arranque seguro: ejecuta tpm.msc en CMD.");A.push("Linux Mint si no necesitas programas de Windows y quieres aún más velocidad.");if(w=="11")m="Quédate en Windows 11 y optimízalo";else if(w=="10")m="Pasa a Windows 11 (instalación limpia recomendada)"}
+else if(c.w==1&&ram>=4&&!vold){m="Windows 11 con ajustes (o Linux Mint)";W.push("Es compatible, pero con "+ram+" GB queda justo: Windows 11 va mejor con 8 GB.","Quita bloatware y programas de inicio, y sube la RAM cuando puedas.");A.push("Linux Mint Cinnamon")}
+else if(vold){m=ram<=2?"Lubuntu o antiX (muy livianos)":"Linux Mint XFCE";W.push("Con este equipo Windows 10 y 11 irían muy lentos. Linux liviano lo deja ágil y con seguridad al día.");A.push("ChromeOS Flex si solo usas internet")}
+else if(c.w==-1){m="Windows 11 si pasa la revisión; si no, Linux Mint";W.push("No sé qué procesador tienes. Usa la app Comprobación de estado del PC de Microsoft o elige tu procesador con los comandos de arriba.")}
+else if(nd=="win"||us=="juegos"){m="Windows 10 22H2 optimizado (con precauciones)";W.push("Necesitas programas o juegos de Windows, pero tu procesador no cumple para Windows 11.","Windows 10 ya no recibe actualizaciones gratuitas de seguridad: mantén navegador y antivirus al día y evita versiones recortadas.");A.push("Linux Mint si algún día puedes dejar los programas de Windows")}
+else{m="Linux Mint Cinnamon";W.push("Tu procesador no cumple para Windows 11 y Windows 10 ya no tiene seguridad gratuita. Mint es rápido, estable y parecido a Windows.");A.push("Windows 10 solo si de verdad necesitas Windows")}
+if(us=="juegos")W.push("Juegos: en Windows funcionan todos; en Linux algunos con anticheat no corren.");if(us=="programar")W.push("Para programar, Linux o Windows con WSL son excelentes.");
+var lin=/Linux|Lubuntu/.test(m);
+var sc10=Math.max(1,Math.min(10,Math.round(sc/4*10))),col=sc10<4?"r":sc10<7?"a":"g",ns=Math.round(sc10/2),d=[],M=[];
+var TJ=el("div","tj"),hd=el("div","tjh"),sr=el("div","row"),S=function(t,cls){var e=el("div","sec "+(cls||""));e.appendChild(el("h4",0,t));TJ.appendChild(e);return e},LL=function(p,a,tg){var u=el(tg||"ul");a.forEach(function(x){u.appendChild(el("li",0,x))});p.appendChild(u)};
+hd.appendChild(el("div","tjk","TARJETÓN DE TU EQUIPO · "+(eq=="lap"?"LAPTOP":"PC DE ESCRITORIO")));sr.appendChild(el("span","score",sc10+"/10"));sr.appendChild(el("span","stars","★★★★★".slice(0,ns)+"☆☆☆☆☆".slice(0,5-ns)));sr.appendChild(el("span","lv",lvl));hd.appendChild(sr);
+hd.appendChild(el("p",0,{r:"Rinde poco: conviene repotenciarlo o cambiar de sistema.",a:"Rinde justo: con ajustes y una mejora cambia mucho.",g:"Rinde bien: solo mantenlo optimizado."}[col]));TJ.appendChild(hd);
+var ST={g:"✔",a:"●",r:"▲"},cs=[["🧠","Procesador",c.t,lv>=3?"g":lv==2?"a":"r",lv>=3?"Bueno":lv==2?"Justo":"Básico"],["💾","Memoria RAM",ram+" GB",ram>=8?"g":ram>=4?"a":"r",ram>=16?"Excelente":ram>=8?"Buena":ram>=4?"Justa":"Insuficiente"],["🗄️","Disco",dk=="ssd"?"SSD (sólido)":dk=="hdd"?"HDD (mecánico)":"Sin identificar",dk=="ssd"?"g":dk=="hdd"?"r":"a",dk=="ssd"?"Rápido":dk=="hdd"?"Lento":"Revisar"],["🪟","Sistema actual",WL[w],w=="11"?"g":old?"r":"a",w=="11"?"Con soporte":old?"Sin soporte":w=="10"?"Soporte terminado":"Revisar"]];
+var gr=el("div","grid");gr.style.padding="12px 16px";cs.forEach(function(k){var b=el("div","mc st-"+k[3]);b.appendChild(el("div","mct",k[0]+" "+k[1]));b.appendChild(el("div","mcv",k[2]));b.appendChild(el("div","mcs",ST[k[3]]+" "+k[4]));gr.appendChild(b)});TJ.appendChild(gr);
+var s1=S("📋 Cómo es tu equipo");
+d.push("Procesador: "+(lv<=1?"es de nivel básico para hoy; sirve para internet y oficina.":lv==2?"es de entrada; cumple para tareas diarias.":lv==3?"es de nivel medio y rinde bien para casi todo.":"es de nivel alto y aguanta trabajo pesado.")+" Es de "+c.y+" (unos "+age+" años)."+(c.w==1?" Cumple por generación para Windows 11 (confirma TPM 2.0 con tpm.msc).":c.w==0?" No cumple para Windows 11.":""));
+d.push("Memoria RAM ("+ram+" GB): "+(ram<=2?"muy poca, Windows moderno se siente pesado.":ram<=4?"poca; con varias pestañas se traba.":ram<=8?"justa para el uso diario.":ram<=16?"cómoda.":"te sobra para casi todo."));
+d.push("Disco: "+(dk=="ssd"?"SSD, rápido. No lo desfragmentes; usa solo TRIM.":dk=="hdd"?"HDD, es el mayor freno: de 5 a 10 veces más lento que un SSD.":"no sabes cuál es; corre el comando del Paso 1."));
+d.push("Windows: "+WS[w]);LL(s1,d);
+[["Procesador",lv/4],["Memoria RAM",rl/4],["Disco",dl/3]].forEach(function(b){var p=Math.max(8,Math.round(b[1]*100)),cc=p<40?"var(--bad)":p<70?"var(--md)":"var(--ok)",bw=el("div","bar"),i=el("i");i.style.cssText="width:"+p+"%;background:"+cc;bw.appendChild(i);s1.appendChild(el("small",0,b[0]));s1.appendChild(bw)});
+var s2=S("🎯 Sistema recomendado para mejor rendimiento","so"),hm=el("p",0,m);hm.style.cssText="font-size:1.25rem;font-weight:800;margin:2px 0";s2.appendChild(hm);LL(s2,W);if(A.length){s2.appendChild(el("p","note","Otras opciones:"));LL(s2,A)}
+s2.appendChild(el("p","note","Pasos para hacerlo:"));LL(s2,lin?["Respalda tus archivos.","Descarga la ISO solo desde la página oficial del sistema.","Crea el USB con Rufus (en Windows) o Balena Etcher.","Arranca en modo Live y prueba sin instalar.","Instala y usa LibreOffice, GIMP, VLC y Firefox como equivalentes libres."]:["Respalda tus archivos.","Descarga la ISO oficial desde Microsoft y crea el USB.","Instala limpio. No uses versiones modificadas o recortadas.","Instala los drivers desde la página del fabricante.","Quita bloatware y revisa el inicio con las pestañas del portal."],"ol");
+if(old)LL(S("⚠ Si sigues en Windows "+w,"so"),["Actualiza a Windows 10/11 si el equipo lo permite, o pasa a Linux Mint.","Mientras tanto: no uses la cuenta de administrador a diario, evita la banca en línea y mantén antivirus y navegador al día.","Usa los comandos de CMD: el PowerShell de esa versión es muy antiguo y no hay apps de la Store. Para quitar programas usa appwiz.cpl."]);
+var s3=S("🚀 Cómo repotenciarlo (en orden de impacto)");
+if(dk=="hdd")M.push("Cambiar el HDD por un SSD (SATA o NVMe según tu equipo): es la mejora que más se nota.");if(dk=="nose")M.push("Averiguar tu tipo de disco antes de comprar nada.");
+if(ram<8)M.push("Subir la RAM a 8 GB como mínimo. Revisa el tipo (DDR3/DDR4/DDR5) con Get-CimInstance Win32_PhysicalMemory y usa dos módulos iguales para doble canal.");else if(ram<16&&(us=="diseno"||us=="programar"||us=="juegos"))M.push("Para tu uso, 16 GB marcan la diferencia.");
+if(age>=6)M.push("Limpiar el polvo y cambiar la pasta térmica: en equipos de "+age+" años baja la temperatura y evita que se frene.");
+if(eq=="lap")M.push("Revisar la batería con powercfg /batteryreport; si la capacidad real baja del 60 % de la de diseño, cambiarla.");
+if(us=="juegos"||us=="diseno")M.push("Usar una tarjeta de video dedicada o actualizar la actual, con drivers del fabricante.");
+M.push("Respaldo 3-2-1: 3 copias, 2 tipos de medio y 1 fuera de casa (nube o disco externo).","Actualizar BIOS/UEFI y drivers solo desde la página del fabricante.");LL(s3,M,"ol");
+var s4=S("🧩 Para qué uso sirve tu equipo");[["Internet, correo y oficina",ram>=4?2:1],["Videollamadas y streaming",ram>=4&&lv>=2?2:ram>=4?1:0],["Estudio y programar",ram>=8&&lv>=2?2:ram>=4?1:0],["Edición de fotos",ram>=8&&lv>=3?2:ram>=8?1:0],["Juegos ligeros",ram>=8&&lv>=2?2:ram>=4?1:0],["Juegos modernos, video y 3D (requiere tarjeta de video dedicada)",ram>=16&&lv>=3?1:0]].forEach(function(u){s4.appendChild(el("span","uc uc"+u[1],["❌ ","🟡 ","✅ "][u[1]]+u[0]))});s4.appendChild(el("p","note","✅ bien · 🟡 limitado · ❌ no recomendado"));
+var s5=S("🛠️ Comandos para optimizar sin dañar (todos de riesgo bajo)");s5.appendChild(el("div","warn","Primero crea el punto de restauración"+(old?" (en Windows 7/8: Panel de control → Sistema → Protección del sistema → Crear).":" y luego ejecuta los demás.")));
+var OKG={Mantenimiento:1,Rendimiento:1,Limpieza:1,Seguridad:1,Disco:1},pr=C.filter(function(x){return x.t.indexOf("Crear punto de restauración")==0&&!old})[0],cl=C.filter(function(x){return x.k=="seguro"&&OKG[x.g[0]]&&!pWarn(x)&&(!old||x.p=="cmd")&&x!==pr&&!/Abrir|Ver puntos|Ventana|Visor|Monitor|Administrador/.test(x.t)}).sort(function(a,b){return CO(a.g[0])-CO(b.g[0])||a.l-b.l});
+if(pr)cl.unshift(pr);var lastg="";
+cl.forEach(function(x){if(x!==pr&&x.g[0]!=lastg){lastg=x.g[0];var h=el("h5",0,lastg);h.style.cssText="margin:14px 0 2px;color:var(--ac);text-transform:uppercase;font-size:.85rem";s5.appendChild(h)}
+var cd=el("div","card k-seguro"),tp=el("div","row");cd.style.margin="6px 0";tp.appendChild(el("span","where "+x.p,x.p=="ps"?"POWERSHELL":"CMD"));if(x.a)tp.appendChild(el("span","lvl l2","ADMIN"));tp.appendChild(el("span","lvl l"+x.l,LV[x.l]));cd.appendChild(tp);cd.appendChild(el("h3",0,x.t));cd.appendChild(el("p","note",x.n));cd.appendChild(el("pre",0,x.c));var cb2=el("button","cp","Copiar");cb2.style.marginLeft="0";cb2.onclick=function(){copy(x.c,cb2)};cd.appendChild(cb2);s5.appendChild(cd)});
+s5.appendChild(el("p","note","Más opciones (con riesgo explicado):"));
+["Mantenimiento","Seguridad","Información","Limpieza","Red"].forEach(function(g){var b=el("button","chip","Comandos de "+g);b.style.margin="3px";b.onclick=function(){goCat(old?"cmd":"ps",g)};s5.appendChild(b)});
+var b1=el("button","chip","Quitar bloatware");b1.style.margin="3px";b1.onclick=function(){$("bver").value=(w=="11"?"w11":"w10");bBuild();show("bloat")};s5.appendChild(b1);var b2=el("button","chip","Gestionar inicio");b2.style.margin="3px";b2.onclick=function(){show("ini")};s5.appendChild(b2);
+Rr.appendChild(TJ);
+lastRep="INFORME TÉCNICO\nEquipo: "+(eq=="lap"?"Laptop":"PC")+"\nWindows: "+WL[w]+"\nProcesador: "+c.t+"\nRAM: "+ram+" GB\nDisco: "+dk+"\nEstado: "+lvl+"\nSistema recomendado: "+m+"\n\n"+d.join("\n")+"\n\nMejoras:\n- "+M.join("\n- ");
+var cb=el("button","cp","Copiar informe");cb.style.display="block";cb.style.margin="12px 0 0";cb.onclick=function(){copy(lastRep,cb)};Rr.appendChild(cb)}
+$("rst2").onclick=resetAll;$("cpucp").onclick=function(){copy($("cpucmd").textContent,$("cpucp"))};
+$("go").onclick=report;
+// Apps
+var apps=[];try{apps=JSON.parse(localStorage.getItem("apps")||"[]")}catch(e){}
+function saveApps(){try{localStorage.setItem("apps",JSON.stringify(apps))}catch(e){}}
+function rApps(){var L=$("alist");L.textContent="";if(!apps.length){L.appendChild(el("p","note","Todavía no hay apps. Cuando tengas tu lista, agrégalas arriba."));return}
+apps.forEach(function(a,i){var d=el("div","card");d.appendChild(el("h3",0,a.n));if(a.d)d.appendChild(el("p","note",a.d));var r=el("div","row");
+if(/^https?:\/\//i.test(a.l)){var l=el("a",0,"Abrir enlace");l.href=a.l;l.target="_blank";l.rel="noopener noreferrer";r.appendChild(l)}
+var x=el("button","cp","Quitar");x.onclick=function(){apps.splice(i,1);saveApps();rApps()};r.appendChild(x);d.appendChild(r);L.appendChild(d)})}
+$("aadd").onclick=function(){var n=$("an").value.trim(),l=$("al").value.trim();if(!n)return;if(l&&!/^https?:\/\//i.test(l))l="https://"+l;
+apps.push({n:n,l:l,d:$("ad").value.trim()});saveApps();$("an").value=$("al").value=$("ad").value="";rApps()};
+// Bloatware
+var B=[['Noticias','Microsoft.BingNews',1],['Clima','Microsoft.BingWeather',1],['Ayuda de Microsoft','Microsoft.GetHelp',1],['Consejos','Microsoft.Getstarted',1],['Solitario','Microsoft.MicrosoftSolitaireCollection',1],['Centro de opiniones','Microsoft.WindowsFeedbackHub',1],['Office Hub (anuncio de Office)','Microsoft.MicrosoftOfficeHub',1],['Contactos','Microsoft.People',1],['Cortana','Microsoft.549981C3F5F10',1],['Skype','Microsoft.SkypeApp',1],['Visor 3D','Microsoft.Microsoft3DViewer',1],['Realidad mixta','Microsoft.MixedReality.Portal',1],['Power Automate','Microsoft.PowerAutomateDesktop',1],['Clipchamp (editor de video)','Clipchamp.Clipchamp',1],['Groove Música','Microsoft.ZuneMusic',0],['Películas y TV','Microsoft.ZuneVideo',0],['Tu Teléfono','Microsoft.YourPhone',0],['Correo y Calendario','microsoft.windowscommunicationsapps',0],['Mapas','Microsoft.WindowsMaps',0],['Teams personal','MSTeams',0],['Copilot','Microsoft.Copilot',0],['Xbox (app y barra de juegos)','Microsoft.XboxGamingOverlay,Microsoft.GamingApp,Microsoft.Xbox.TCUI,Microsoft.XboxApp',0]];
+function bGen(){var s=[],q=String.fromCharCode(39);document.querySelectorAll('#blist input').forEach(function(i){if(i.checked)i.value.split(',').forEach(function(p){s.push(q+p+q)})});
+$('bout').textContent=s.length?'$apps = '+s.join(',')+'\nforeach($a in $apps){Get-AppxPackage -Name $a -AllUsers | Remove-AppxPackage -AllUsers -ErrorAction SilentlyContinue}':'Marca al menos una app.'}
+B.forEach(function(b){var d=el('label','bi'),c=el('input');c.type='checkbox';c.value=b[1];c.checked=!!b[2];c.onchange=bGen;d.appendChild(c);d.appendChild(el('span',0,b[0]+(b[2]?'':' (opcional)')));$('blist').appendChild(d)});
+function bSet(f){document.querySelectorAll('#blist input').forEach(function(i,k){i.checked=f(k)});bGen()}
+$('bsafe').onclick=function(){bSet(function(k){return !!B[k][2]})};$('bnone').onclick=function(){bSet(function(){return false})};$('ball').onclick=function(){bSet(function(){return true})};
+$('bcp').onclick=function(){copy($('bout').textContent,$('bcp'))};
+function cc(t,n,c){var d=el('div','card');d.appendChild(el('h3',0,t));d.appendChild(el('p','note',n));d.appendChild(el('pre',0,c));var b=el('button','cp','Copiar');b.style.marginLeft='0';b.onclick=function(){copy(c,b)};d.appendChild(b);return d}
+$('bextra').appendChild(cc('Quitar OneDrive','Lo desinstala si no lo usas. Guarda antes lo que tengas sincronizado.','winget uninstall Microsoft.OneDrive'));
+$('bextra').appendChild(cc('Volver a instalar las apps de fábrica','Si quitaste algo por error, esto lo restaura.','Get-AppxPackage -AllUsers | ForEach-Object { Add-AppxPackage -DisableDevelopmentMode -Register (Join-Path $_.InstallLocation AppXManifest.xml) -ErrorAction SilentlyContinue }'));
+bSet(function(k){return !!B[k][2]});
+
+// Gestionar inicio
+var BS=String.fromCharCode(92),QT=String.fromCharCode(39);
+var IC=`Get-CimInstance Win32_StartupCommand | ForEach-Object { $_.Name + ' | ' + $_.Command + ' | ' + $_.Location } | Set-Clipboard`;
+(function(){var b=el('button','cp','Copiar comando');b.style.marginLeft='0';b.onclick=function(){copy(IC,b)};$('ini1').appendChild(el('pre',0,IC));$('ini1').appendChild(b)})();
+var FN=[`function Off($n,$v){`,`$s='Software~Microsoft~Windows~CurrentVersion'`,`$b=[byte[]]($v,0,0,0,0,0,0,0,0,0,0,0)`,`$m=@((('HKCU:~'+$s+'~Run'),('HKCU:~'+$s+'~Explorer~StartupApproved~Run')),(('HKLM:~'+$s+'~Run'),('HKLM:~'+$s+'~Explorer~StartupApproved~Run')),('HKLM:~Software~WOW6432Node~Microsoft~Windows~CurrentVersion~Run',('HKLM:~'+$s+'~Explorer~StartupApproved~Run32')),('',('HKCU:~'+$s+'~Explorer~StartupApproved~StartupFolder')))`,`foreach($p in $m){`,`if($p[0]){$ok=[bool](Get-ItemProperty -Path $p[0] -Name $n -ErrorAction SilentlyContinue)}else{$ok=($n -like '*.lnk')}`,`if($ok){if(-not(Test-Path $p[1])){New-Item $p[1] -Force|Out-Null};Set-ItemProperty -Path $p[1] -Name $n -Value $b -Type Binary;'Listo: '+$n}}}`].join('\n').replace(/~/g,BS);
+var G=[[/securityhealth|defender|avast|avg|kaspersky|eset|norton|mcafee|bitdefender|malwarebytes/i,'d','Seguridad / antivirus','Protege tu equipo. Déjalo.'],[/keepass|bitwarden|1password|lastpass/i,'d','Gestor de contraseñas','Útil tenerlo listo. Déjalo si lo usas a diario.'],[/realtek|nvidia|igfx|synaptics|touchpad/i,'d','Controlador de hardware','Maneja audio, video o touchpad. Déjalo.'],[/onedrive/i,'q','OneDrive','Nube de Microsoft. Si no lo usas, quítalo.'],[/onenote/i,'q','OneNote','Acceso directo que no necesitas al encender.'],[/bing/i,'q','Bing','Cambia fondos y búsqueda. No hace falta.'],[/msedge|edge/i,'q','Microsoft Edge','Precarga Edge. Se abre igual cuando lo uses.'],[/^epl|epson|canon|brother|printer/i,'q','Monitor de impresora','La impresora funciona sin esto.'],[/spotify|discord|steam|teams|skype|zoom|epic|battle|origin|ccxprocess|adobe|webex|dropbox|telegram|whatsapp/i,'q','Programa que se abre solo','Ábrelo a mano cuando lo necesites.'],[/googledrive|google drive/i,'o','Google Drive','Sincroniza tus archivos. Déjalo solo si lo necesitas desde el arranque.'],[/rustdesk|anydesk|teamviewer/i,'o','Acceso remoto','Déjalo solo si te conectas remoto a menudo.'],[/notion|everything|sandboxie|filee|download manager|sandman/i,'o','Aplicación de uso ocasional','Se abre a mano cuando la necesites.']];
+var BD={d:['✅ Dejar','var(--ok)'],q:['❌ Quitar','var(--bad)'],o:['🟡 Opcional','var(--md)'],r:['❓ Revisar','var(--mu)']};
+var ITEMS=[];
+function gInfo(it){var i;for(i=0;i<G.length;i++)if(G[i][0].test(it.n))return G[i];for(i=0;i<G.length;i++)if(G[i][0].test(it.c))return G[i];return [0,'r','Programa sin identificar','No lo reconozco. Búscalo antes de quitarlo.']}
+function gParse(t){var out=[],seen={};t.split(/\r?\n/).forEach(function(l){l=l.trim();if(!l||/^(Name|-{2,})(\s|$)/.test(l)||/^PS /.test(l))return;var p=l.split(' | '),n,c;if(p.length>=2){n=p[0].trim();c=p[1].trim()}else{var w=l.split(/\s{2,}/);n=w[0];c=w.slice(1).join(' ')}if(!n||seen[n])return;seen[n]=1;out.push({n:n,c:c})});return out}
+function iGen(){var m=$('imode').value,s=[],seen={},k=0;ITEMS.forEach(function(it){if(!it.x)return;k++;var n=/\.lnk$/i.test(it.c)?it.c:it.n;if(seen[n])return;seen[n]=1;s.push('Off '+QT+n.split(QT).join(QT+QT)+QT+' '+m)});
+$('iscript').textContent=s.length?FN+'\n'+s.join('\n'):'Marca al menos un programa.'}
+function iRender(){var L=$('icards');L.textContent='';var rec=0;ITEMS.forEach(function(it){var g=it.g;it.x=g[1]=='q';if(it.x)rec++;});
+$('isum').textContent=ITEMS.length+' programas arrancan con tu Windows. Te sugiero quitar '+rec+'.';
+ITEMS.forEach(function(it){var g=it.g,d=el('div','card'),b=BD[g[1]];d.style.borderLeft='5px solid '+b[1];var h=el('h3',0,it.n+'  ');var bg=el('span','badge',b[0]);bg.style.color=b[1];h.appendChild(bg);d.appendChild(h);d.appendChild(el('p','note',g[2]+': '+g[3]));var pr=el('pre',0,it.c);pr.style.fontSize='11px';pr.style.maxHeight='3.2em';pr.style.overflow='hidden';d.appendChild(pr);
+var lb=el('label','bi'),c=el('input');c.type='checkbox';c.checked=it.x;c.onchange=function(){it.x=c.checked;iGen()};lb.style.margin='0';lb.appendChild(c);lb.appendChild(el('span',0,'Seleccionar para el script'));it.cb=c;d.appendChild(lb);L.appendChild(d)});iGen()}
+$('igo').onclick=function(){ITEMS=gParse($('ipaste').value);ITEMS.forEach(function(it){it.g=gInfo(it)});if(!ITEMS.length){$('iout').classList.add('hid');return}$('iout').classList.remove('hid');iRender()};
+$('irec').onclick=iRender;$('imode').onchange=iGen;
+$('icp').onclick=function(){copy($('iscript').textContent,$('icp'))};
+// ===== Mas comandos, categorias, porques, perfil =====
+function X(p,g,k,a,t,n,c,r,l){C.push({t:t,n:n,c:c,g:g.split(','),k:k,a:a,p:p,r:r,l:l})}
+var lvf=0,LV=['','BÁSICO','INTERMEDIO','AVANZADO'];
+X('cmd','Información','seguro',0,'Nombre del equipo','Muestra el nombre de tu PC en la red.','hostname');
+X('cmd','Información','seguro',0,'Usuario actual','Dice con qué cuenta estás trabajando.','whoami');
+X('cmd','Información,Seguridad','seguro',0,'Usuarios de este equipo','Lista las cuentas creadas en la PC.','net user');
+X('cmd','Información','seguro',0,'Serial y versión de BIOS','Sirve para soporte o garantía.','wmic bios get serialnumber,smbiosbiosversion\n:: Alternativa:\npowershell -command `Get-CimInstance Win32_BIOS | Select SerialNumber,SMBIOSBIOSVersion`');
+X('cmd','Información','seguro',0,'Controladores instalados (drivers)','Lista los drivers que usa Windows.','driverquery');
+X('cmd','Información,Red','seguro',0,'Dirección MAC','Identificador de tu tarjeta de red.','getmac /v');
+X('cmd','Mantenimiento','seguro',1,'Revisión rápida de la imagen de Windows','Comprueba si Windows tiene daños, sin reparar.','DISM /Online /Cleanup-Image /CheckHealth');
+X('cmd','Mantenimiento','seguro',1,'Escaneo profundo de la imagen de Windows','Busca daños con más detalle. Tarda varios minutos.','DISM /Online /Cleanup-Image /ScanHealth');
+X('cmd','Mantenimiento','seguro',1,'Solo verificar archivos del sistema','Como sfc /scannow pero sin reparar nada.','sfc /verifyonly');
+X('cmd','Mantenimiento','seguro',1,'Forzar actualización de políticas','Aplica de nuevo la configuración de grupo.','gpupdate /force');
+X('cmd','Mantenimiento','seguro',0,'Buscar actualizaciones de Windows','Inicia la búsqueda de actualizaciones (Windows 10 y 11).','usoclient StartScan');
+X('cmd','Mantenimiento,Servicios','seguro',0,'Servicios en ejecución','Lista los servicios que están corriendo.','sc query');
+X('cmd','Mantenimiento','seguro',0,'Tareas programadas','Muestra lo que Windows ejecuta solo a ciertas horas.','schtasks /query /fo table');
+X('cmd','Mantenimiento,Procesos','medio',0,'Cerrar un programa trabado','Cierra a la fuerza un programa que no responde. Cambia nombre.exe por el del programa.','taskkill /f /im nombre.exe','El parámetro /f cierra sin dejar guardar. Si cierras un proceso del sistema (como csrss o winlogon), Windows puede apagarse o dar pantalla azul.');
+X('cmd','Mantenimiento','seguro',0,'Cancelar un apagado programado','Detiene un apagado o reinicio que ya empezó la cuenta regresiva.','shutdown /a');
+X('cmd','Mantenimiento','medio',0,'Reiniciar ahora','Reinicia el equipo de inmediato.','shutdown /r /t 0','Cierra todo sin avisar: si tienes trabajo sin guardar, lo pierdes.');
+X('cmd','Mantenimiento,Rendimiento','seguro',1,'Reporte de eficiencia energética','Genera un informe HTML con lo que gasta energía de más.','powercfg /energy');
+X('cmd','Limpieza,Disco','medio',1,'Limpiar componentes viejos de Windows','Borra versiones antiguas de componentes y libera espacio.','DISM /Online /Cleanup-Image /StartComponentCleanup','Elimina versiones anteriores de componentes: ahorras espacio, pero ya no podrás volver atrás en algunas actualizaciones viejas. Tarda y usa mucho CPU.');
+X('cmd','Limpieza','medio',0,'Borrar temporales (CMD)','Elimina archivos temporales del usuario.','del /q /f /s %temp%~*','Si un programa abierto está usando archivos temporales, puede cerrarse mal. Cierra tus programas antes.');
+X('cmd','Disco,Rendimiento','seguro',1,'Optimizar disco según su tipo','Windows decide: TRIM en SSD o desfragmenta en disco mecánico.','defrag C: /O');
+X('cmd','Disco,Información','seguro',0,'Espacio libre del disco C','Muestra cuánto espacio queda.','fsutil volume diskfree C:');
+X('cmd','Disco','cuidado',1,'Administrador de particiones (DiskPart)','Herramienta para crear, borrar y formatear discos.','diskpart','Un comando mal puesto (clean, format, delete) borra un disco completo sin pedir confirmación. Usa siempre list disk y select disk, y comprueba que es el correcto.');
+X('cmd','Red','seguro',0,'Probar conexión a internet','Envía paquetes de prueba a Google.','ping google.com');
+X('cmd','Red','seguro',0,'Ver la ruta hasta un sitio','Muestra por dónde pasa tu conexión y dónde se corta.','tracert google.com');
+X('cmd','Red','seguro',0,'Consultar DNS','Comprueba si el nombre de una página se resuelve.','nslookup google.com');
+X('cmd','Red,Seguridad','seguro',1,'Conexiones y puertos abiertos','Muestra qué programa usa cada conexión (columna PID).','netstat -ano');
+X('cmd','Red','medio',0,'Renovar la IP','Suelta y vuelve a pedir una IP al router.','ipconfig /release && ipconfig /renew','Pierdes internet unos segundos. Si trabajas por conexión remota (RustDesk, escritorio remoto), se corta y puede no volver.');
+X('cmd','Red','seguro',0,'Ver redes Wi-Fi guardadas','Lista las redes a las que te has conectado.','netsh wlan show profiles');
+X('cmd','Red,Seguridad','medio',1,'Ver la clave de una red Wi-Fi guardada','Cambia NOMBRE por el de la red.','netsh wlan show profile name=NOMBRE key=clear','Muestra la contraseña en pantalla en texto claro. No la dejes visible ni la compartas con quien no deba.');
+X('cmd','Red,Reparar','medio',1,'Reiniciar la pila de red (Winsock)','Arregla fallos raros de conexión.','netsh winsock reset','Borra configuraciones de red de programas como VPN o firewalls de terceros. Requiere reiniciar.');
+X('cmd','Red,Reparar','medio',1,'Reiniciar TCP/IP','Restaura la configuración de red a la de fábrica.','netsh int ip reset','Borra la IP fija y los DNS que hayas puesto a mano. Si tu red los necesita, tendrás que escribirlos otra vez. Requiere reiniciar.');
+X('cmd','Seguridad,Red','seguro',1,'Ver estado del firewall','Muestra si el firewall está activo en cada perfil.','netsh advfirewall show allprofiles');
+X('cmd','Seguridad,Red','seguro',1,'Activar el firewall','Enciende el firewall en todos los perfiles.','netsh advfirewall set allprofiles state on');
+X('cmd','Seguridad,Disco','seguro',1,'Estado del cifrado BitLocker','Dice si tu disco está cifrado.','manage-bde -status');
+X('cmd','Archivos','seguro',0,'Copiar una carpeta (robocopy)','Copia todo lo de origen a destino, sin borrar nada.','robocopy C:~origen D:~destino /E');
+X('cmd','Archivos','cuidado',0,'Copia espejo de una carpeta','Deja el destino idéntico al origen.','robocopy C:~origen D:~destino /MIR','/MIR BORRA en el destino todo lo que no esté en el origen. Con una ruta mal escrita puedes perder archivos. Prueba antes con /L, que solo simula.');
+X('cmd','Archivos','seguro',0,'Ver archivos ocultos de una carpeta','Lista todo, incluso lo oculto.','dir /a');
+X('cmd','Bloatware,Información','seguro',0,'Abrir la lista de programas para desinstalar','Abre Programas y características (sirve en todas las versiones, incluida Windows 7).','appwiz.cpl');
+X('cmd','Procesos,Información','seguro',0,'Buscar un proceso por nombre','Cambia chrome por lo que busques.','tasklist | findstr /i chrome');
+X('ps','Seguridad','seguro',0,'Estado de Windows Defender','Dice si el antivirus y la protección en tiempo real están activos.','Get-MpComputerStatus | Select-Object AntivirusEnabled,RealTimeProtectionEnabled,AntivirusSignatureLastUpdated');
+X('ps','Seguridad','seguro',1,'Actualizar el antivirus','Baja las últimas definiciones de virus.','Update-MpSignature');
+X('ps','Seguridad','seguro',1,'Análisis rápido con Defender','Revisa las zonas más comunes de infección.','Start-MpScan -ScanType QuickScan');
+X('ps','Seguridad,Red','seguro',0,'Estado del firewall','Muestra si está activo cada perfil.','Get-NetFirewallProfile | Select-Object Name,Enabled');
+X('ps','Seguridad,Red','seguro',1,'Activar el firewall en todos los perfiles','Enciende el firewall de Windows.','Set-NetFirewallProfile -Profile Domain,Public,Private -Enabled True');
+X('ps','Seguridad,Red','seguro',0,'Ver puertos que están escuchando','Programas que esperan conexiones entrantes.','Get-NetTCPConnection -State Listen | Select-Object LocalAddress,LocalPort,OwningProcess | Sort-Object LocalPort');
+X('ps','Seguridad,Información','seguro',0,'Usuarios locales','Cuentas del equipo y si están activas.','Get-LocalUser | Select-Object Name,Enabled,LastLogon');
+X('ps','Mantenimiento,Información','seguro',0,'Últimas actualizaciones instaladas','Las 10 más recientes.','Get-HotFix | Sort-Object InstalledOn -Descending | Select-Object -First 10');
+X('ps','Mantenimiento,Reparar','seguro',0,'Últimos errores del sistema','Los 20 errores más recientes del registro de Windows.','Get-EventLog -LogName System -EntryType Error -Newest 20 | Select-Object TimeGenerated,Source,Message | Format-List');
+X('ps','Mantenimiento,Reparar','seguro',1,'Reparar la imagen de Windows (PowerShell)','Equivale al DISM de CMD. Necesita internet.','Repair-WindowsImage -Online -RestoreHealth');
+X('ps','Mantenimiento,Servicios','seguro',0,'Servicios que están corriendo','Lista de servicios activos.','Get-Service | Where-Object Status -eq Running | Sort-Object DisplayName | Select-Object Name,DisplayName');
+X('ps','Mantenimiento,Información','seguro',0,'Resumen del sistema','Nombre, Windows, procesador y RAM en una vista.','Get-ComputerInfo | Select-Object CsName,OsName,OsVersion,CsProcessors,CsTotalPhysicalMemory');
+X('ps','Mantenimiento','seguro',0,'Tareas programadas activas','Lo que Windows ejecuta solo.','Get-ScheduledTask | Where-Object State -eq Ready | Select-Object TaskName,TaskPath');
+X('ps','Rendimiento,Información','seguro',0,'Procesos que más RAM usan','Los 10 que más memoria gastan.','Get-Process | Sort-Object WS -Descending | Select-Object -First 10 Name,@{n=`RAM_MB`;e={[int]($_.WS/1MB)}}');
+X('ps','Rendimiento,Privacidad','medio',1,'Apagar tareas de mejora de experiencia','Desactiva tareas que envían datos de uso a Microsoft.','Get-ScheduledTask -TaskPath `~Microsoft~Windows~Customer Experience Improvement Program~*` | Disable-ScheduledTask','Apaga tareas de recolección de datos. No daña Windows, pero algunas actualizaciones pueden volver a activarlas.');
+X('ps','Limpieza','medio',0,'Vaciar la papelera','Elimina todo lo de la papelera.','Clear-RecycleBin -Force','Borra definitivamente lo que tenga la papelera: no se puede recuperar.');
+X('ps','Limpieza,Mantenimiento','medio',1,'Limpiar caché de Windows Update','Borra descargas de actualizaciones atascadas.','Stop-Service wuauserv -Force; Remove-Item C:~Windows~SoftwareDistribution~Download~* -Recurse -Force; Start-Service wuauserv','Borra descargas de actualizaciones pendientes: Windows las bajará otra vez. No lo hagas en medio de una actualización.');
+X('ps','Red','seguro',0,'Probar conexión (PowerShell)','Prueba la conexión y el puerto 443 de un sitio.','Test-NetConnection google.com -Port 443');
+X('ps','Red,Información','seguro',0,'Ver adaptadores de red','Wi-Fi, cable y su estado.','Get-NetAdapter');
+X('ps','Red,Reparar','seguro',0,'Limpiar caché DNS (PowerShell)','Arregla páginas que no abren aunque haya internet.','Clear-DnsClientCache');
+X('ps','Disco,Información','seguro',0,'Volúmenes y espacio','Unidades, tamaño y espacio libre.','Get-Volume');
+
+X('cmd','Información','seguro',0,'Ventana de versión de Windows','Muestra versión y compilación.','winver');
+X('cmd','Información,Mantenimiento','seguro',0,'Administrador de dispositivos','Revisa drivers con error (icono amarillo).','devmgmt.msc');
+X('cmd','Mantenimiento,Servicios','seguro',0,'Abrir Servicios de Windows','Iniciar, detener o cambiar el tipo de inicio de servicios.','services.msc');
+X('cmd','Rendimiento,Procesos','seguro',0,'Monitor de recursos','CPU, RAM, disco y red por proceso, en vivo.','resmon');
+X('cmd','Información,Mantenimiento','seguro',0,'Monitor de confiabilidad','Historial de fallos y pantallazos azules por fecha.','perfmon /rel');
+X('cmd','Información,Mantenimiento','seguro',0,'Visor de eventos','Registro de errores del sistema y las aplicaciones.','eventvwr');
+X('cmd','Inicio','seguro',0,'Administrador de tareas','Pestaña Inicio: desactiva programas que arrancan solos.','taskmgr');
+X('cmd','Inicio,Servicios','medio',1,'Configuración del sistema (msconfig)','Controla arranque y servicios.','msconfig','Si desactivas servicios de Microsoft o eliges Arranque selectivo por error, Windows puede iniciar con fallos. Toca solo la pestaña Inicio o servicios que conozcas.',2);
+X('cmd','Disco','seguro',0,'Estado de TRIM del SSD','Si responde 0, TRIM está activo.','fsutil behavior query DisableDeleteNotify');
+X('cmd','Disco,Rendimiento','medio',1,'Apagar fecha de último acceso','Menos escrituras al disco, útil en SSD.','fsutil behavior set disablelastaccess 1','Algunos programas de respaldo o búsqueda usan esa fecha y dejarán de verla. Se revierte con el valor 0.');
+X('cmd','Disco','seguro',1,'Analizar el almacén de componentes','Dice si conviene limpiar WinSxS, sin borrar nada.','DISM /Online /Cleanup-Image /AnalyzeComponentStore');
+X('cmd','Limpieza,Disco','seguro',0,'Limpieza de disco avanzada','Eliges qué borrar con sageset y luego lo ejecutas con sagerun.','cleanmgr /sageset:1\ncleanmgr /sagerun:1');
+X('cmd','Disco','medio',1,'Buscar sectores dañados (chkdsk /r)','Revisión profunda del disco.','chkdsk C: /r','Pide reiniciar y puede tardar horas en discos grandes; no podrás usar el equipo. En un SSD casi nunca hace falta.');
+X('cmd','Limpieza,Seguridad','medio',1,'Borrar de forma segura el espacio libre','Sobrescribe el espacio libre para que lo ya borrado no se recupere.','cipher /w:C:~','No toca tus archivos actuales, pero tarda mucho y desgasta un SSD con escrituras. Úsalo antes de vender un disco mecánico.');
+X('cmd','Disco','cuidado',1,'Formatear una unidad','Borra todo el contenido de una unidad.','format D: /q','Borra TODA la unidad indicada y es muy difícil recuperarla. Si te equivocas de letra pierdes datos: confírmala en el Explorador.');
+X('cmd','Disco','cuidado',1,'Convertir FAT32 a NTFS','Cambia el sistema de archivos sin borrar datos.','convert D: /fs:ntfs','No tiene vuelta atrás sin formatear. Si se corta la luz durante el proceso puedes perder datos: respalda antes.');
+X('cmd','Archivos,Seguridad','medio',0,'Recuperar carpetas ocultas por virus de USB','Quita los atributos ocultos de una unidad.','attrib -h -r -s /s /d E:~*.*','Cambia atributos de todo lo de la unidad, incluso archivos de sistema que estaban ocultos a propósito. Úsalo solo en USB o discos externos, nunca en C:.');
+X('cmd','Seguridad,Información','seguro',0,'Administradores del equipo','Quién tiene permisos de administrador.','net localgroup administrators');
+X('cmd','Seguridad','seguro',0,'Respaldar el registro del usuario','Guarda una copia en la carpeta actual.','reg export HKCU respaldo.reg /y');
+X('cmd','Seguridad','cuidado',1,'Activar la cuenta Administrador oculta','Habilita la cuenta Administrador integrada.','net user Administrador /active:yes','Esa cuenta no tiene restricciones ni UAC: cualquier virus que corra ahí controla todo. Ponle contraseña y desactívala al terminar con /active:no. En Windows en inglés se llama Administrator.');
+X('cmd','Seguridad,Privacidad','medio',1,'Borrar el registro de eventos del sistema','Vacía el registro System.','wevtutil cl System','Pierdes el historial de errores que sirve para diagnosticar fallos.');
+X('cmd','Mantenimiento','medio',1,'Reiniciar Windows Update desde cero','Detiene servicios, renombra las cachés y los vuelve a iniciar.','net stop wuauserv\nnet stop bits\nren C:~Windows~SoftwareDistribution SoftwareDistribution.old\nren C:~Windows~System32~catroot2 catroot2.old\nnet start bits\nnet start wuauserv','Se redescargan las actualizaciones pendientes y se pierde el historial visible. No lo hagas mientras Windows está instalando algo.');
+X('cmd','Red','seguro',0,'Tabla ARP','Dispositivos que tu PC ha visto en la red local.','arp -a');
+X('cmd','Red','seguro',0,'Ping continuo','Prueba la estabilidad de la conexión. Ctrl+C para parar.','ping -t 8.8.8.8');
+X('cmd','Red,Información','seguro',1,'Reporte de Wi-Fi','Genera un HTML con las desconexiones recientes.','netsh wlan show wlanreport');
+X('cmd','Red,Seguridad','cuidado',1,'Restablecer el firewall de fábrica','Borra todas las reglas del firewall.','netsh advfirewall reset','Elimina reglas que instalaron tus programas: juegos, servidores o acceso remoto pueden dejar de conectar. Exporta antes con netsh advfirewall export.');
+X('cmd','Procesos,Mantenimiento','medio',0,'Reiniciar el Explorador de Windows','Útil si la barra de tareas o el escritorio se congelan.','taskkill /f /im explorer.exe & start explorer.exe','Las ventanas del Explorador se cierran un momento. No afecta a otros programas.');
+X('cmd','Mantenimiento','seguro',0,'Programar apagado en 1 hora','Se cancela con shutdown /a.','shutdown /s /t 3600');
+X('cmd','Mantenimiento','medio',0,'Actualizar todos los programas (winget)','Actualiza todo lo instalado.','winget upgrade --all','Una versión nueva puede romper complementos o licencias. No existe en Windows 7.');
+X('cmd','Mantenimiento','cuidado',1,'Arrancar en modo seguro (bcdedit)','Fuerza el modo seguro en el próximo inicio.','bcdedit /set {current} safeboot minimal\n:: Para volver al modo normal:\nbcdedit /deletevalue {current} safeboot','Windows seguirá en modo seguro (sin red ni drivers) hasta que lo revierta. Un error en bcdedit puede impedir que Windows inicie.');
+X('cmd','Mantenimiento,Disco','cuidado',1,'Reconstruir el arranque (bootrec)','Repara el arranque. Solo desde el entorno de recuperación (USB de Windows).','bootrec /fixmbr\nbootrec /fixboot\nbootrec /rebuildbcd','Con varios sistemas instalados puedes perder la entrada de uno. En discos GPT/UEFI usa bcdboot en lugar de fixboot.');
+X('cmd','Bloatware','medio',0,'Desactivar Copilot (Windows 11)','Lo apaga por política del usuario.','reg add HKCU~Software~Policies~Microsoft~Windows~WindowsCopilot /v TurnOffWindowsCopilot /t REG_DWORD /d 1 /f','Edita el registro. Se revierte con valor 0, pero un error de ruta crea claves inútiles.');
+X('ps','Información,Mantenimiento','seguro',0,'Errores de las últimas 24 horas','Errores críticos recientes del sistema.','Get-WinEvent -FilterHashtable @{LogName=`System`;Level=1,2;StartTime=(Get-Date).AddDays(-1)} -ErrorAction SilentlyContinue | Select-Object -First 20 TimeCreated,ProviderName,Message');
+X('ps','Información,Rendimiento','seguro',0,'Memoria libre ahora','MB de RAM disponibles.','(Get-Counter `~Memory~Available MBytes`).CounterSamples.CookedValue');
+X('ps','Información,Seguridad','seguro',0,'Características de Windows activadas','Funciones opcionales encendidas (SMB1, Telnet...).','Get-WindowsOptionalFeature -Online | Where-Object State -eq Enabled | Select-Object FeatureName');
+X('ps','Seguridad','medio',1,'Desactivar SMB1','Cierra un protocolo viejo que explotó WannaCry.','Disable-WindowsOptionalFeature -Online -FeatureName SMB1Protocol -NoRestart','Impresoras, NAS o equipos muy viejos que solo usan SMB1 dejarán de conectarse. Requiere reiniciar.');
+X('ps','Seguridad','seguro',1,'Protección contra apps no deseadas','Defender bloquea adware y programas basura.','Set-MpPreference -PUAProtection Enabled');
+X('ps','Seguridad','medio',1,'Acceso controlado a carpetas (anti-ransomware)','Bloquea que programas no confiables modifiquen Documentos e Imágenes.','Set-MpPreference -EnableControlledFolderAccess Enabled','Puede bloquear programas legítimos (editores, juegos) hasta que los permitas en Seguridad de Windows.');
+X('ps','Seguridad','seguro',1,'Activar puntos de restauración','Enciende la protección del sistema en C:.','Enable-ComputerRestore -Drive `C:~`');
+X('ps','Seguridad,Información','seguro',0,'Ver puntos de restauración','Lista los puntos creados.','Get-ComputerRestorePoint');
+X('ps','Seguridad','seguro',0,'Mostrar extensiones de archivo','Ayuda a detectar archivos falsos tipo .pdf.exe.','Set-ItemProperty -Path `HKCU:~Software~Microsoft~Windows~CurrentVersion~Explorer~Advanced` -Name HideFileExt -Value 0');
+X('ps','Procesos','medio',0,'Cerrar un proceso por nombre','Cambia chrome por el programa.','Stop-Process -Name chrome -Force','-Force cierra sin guardar. No lo uses con procesos del sistema (csrss, winlogon, svchost).');
+X('ps','Procesos','seguro',0,'Programas que no responden','Lista apps trabadas.','Get-Process | Where-Object {-not $_.Responding} | Select-Object Name,Id');
+X('ps','Red,Información','seguro',0,'Configuración IP resumida','IP, puerta de enlace y DNS por adaptador.','Get-NetIPConfiguration');
+X('ps','Red','medio',1,'Cambiar DNS a Cloudflare y Google','Puede acelerar la resolución de nombres.','Set-DnsClientServerAddress -InterfaceAlias `Wi-Fi` -ServerAddresses 1.1.1.1,8.8.8.8','Si tu red usa DNS propio (empresa, control parental) dejará de aplicarse. Cambia Wi-Fi por el nombre de tu adaptador (Get-NetAdapter).');
+X('ps','Red','medio',1,'Reiniciar adaptadores de red','Apaga y enciende los adaptadores.','Get-NetAdapter | Restart-NetAdapter','Pierdes internet unos segundos y se cortan sesiones remotas.');
+X('ps','Disco,Información','seguro',0,'20 archivos más grandes de C:','Encuentra qué ocupa espacio. Tarda.','Get-ChildItem C:~ -Recurse -File -ErrorAction SilentlyContinue | Sort-Object Length -Descending | Select-Object -First 20 FullName,@{n=`MB`;e={[int]($_.Length/1MB)}}');
+X('ps','Disco,Mantenimiento','seguro',1,'Escanear el disco C: en línea','Revisa errores sin reiniciar.','Repair-Volume -DriveLetter C -Scan');
+X('ps','Limpieza','medio',1,'Borrar Temp de Windows','Vacía C:~Windows~Temp.','Remove-Item C:~Windows~Temp~* -Recurse -Force -ErrorAction SilentlyContinue','Si hay una instalación en curso puede fallar. Cierra instaladores antes.');
+X('ps','Batería,Rendimiento','seguro',0,'Plan de energía equilibrado','Ahorra batería en laptop.','powercfg /setactive 381b4222-f694-41f0-9685-ff5bb260df2e');
+X('ps','Batería,Mantenimiento','seguro',1,'Reporte de energía guardado en el escritorio','Genera el reporte de 60 segundos y lo abre desde tu escritorio.','powercfg /energy /output $env:USERPROFILE~Desktop~energia.html\nInvoke-Item $env:USERPROFILE~Desktop~energia.html');
+X('ps','Batería,Mantenimiento','seguro',0,'Ver qué impide que el equipo se suspenda','Lista programas o drivers que lo mantienen despierto.','powercfg /requests');
+X('ps','Batería,Mantenimiento','seguro',0,'Ver qué despertó al equipo','Dice qué dispositivo lo sacó de la suspensión.','powercfg /lastwake');
+X('ps','Batería,Rendimiento','medio',1,'Activar suspensión selectiva de USB','Corrige el error de USB del reporte de energía.','powercfg /setacvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 1\npowercfg /setdcvalueindex SCHEME_CURRENT 2a737441-1930-4402-8d77-b2bebba308a3 48e6b7a6-50f5-4782-a5d4-53bb8f07e226 1\npowercfg /setactive SCHEME_CURRENT','Algunos mouse o teclados USB viejos pueden dejar de responder o desconectarse al despertar. Si pasa, repite el comando con el valor 0 al final.');
+X('ps','Batería,Mantenimiento','medio',1,'Restablecer los planes de energía a fábrica','Deja los planes de Windows como vinieron.','powercfg -restoredefaultschemes','Borra los planes personalizados (del fabricante o creados por ti) y sus ajustes. Anota lo que quieras conservar antes.');
+C.forEach(function(x){x.l=x.l||(x.k=='cuidado'?3:(x.k=='medio'||x.a)?2:1);x.c=x.c.replace(/~/g,BS).replace(/\x60/g,x.p=='cmd'?String.fromCharCode(34):String.fromCharCode(39));x.g=x.g.map(function(t){return t=='Reparar'?'Mantenimiento':t});x.g=x.g.filter(function(t,i){return x.g.indexOf(t)==i})});
+var ORD=['Información','Mantenimiento','Rendimiento','Limpieza','Disco','Seguridad','Privacidad','Red','Servicios','Procesos','Archivos','Inicio','Bloatware','Batería'];
+function CO(t){var i=ORD.indexOf(t);return i<0?99:i}
+var RS=[['apps de relleno','Desinstala apps de Windows. Si borras alguna que sí usabas, tendrás que bajarla otra vez de la Microsoft Store. Se puede deshacer.'],['Groove','Quita apps que algunos usan, como el enlace con el celular. Se pueden reinstalar desde la Store.'],['telemetría (DiagTrack)','Algunas funciones de diagnóstico y ayuda de Microsoft dejan de recibir datos. No daña Windows y se puede reactivar.'],['servicios de Xbox','Si juegas con Xbox o Game Pass, o inicias sesión en juegos de la tienda, dejarán de funcionar hasta que lo reactives.'],['SysMain','En disco mecánico (HDD) SysMain acelera la apertura de programas; apagarlo lo haría más lento. Solo conviene con SSD.'],['indexación','Sin el índice, buscar archivos desde Inicio o el Explorador es mucho más lento, y Outlook puede dejar de buscar bien.'],['hibernación','Pierdes la hibernación y el inicio rápido de Windows. No lo hagas en una laptop si dependes de hibernar.'],['Desfragmentar','En un SSD no sirve y lo desgasta: solo para disco mecánico. Además tarda y deja el equipo lento mientras corre.'],['Revisar errores del disco','Pide reiniciar y bloquea el equipo durante la revisión, que en discos grandes puede tardar horas.']];
+function reason(x){if(x.r)return x.r;for(var i=0;i<RS.length;i++)if(x.t.indexOf(RS[i][0])>-1)return RS[i][1];return 'Cambia ajustes del sistema. Crea un punto de restauración antes de ejecutarlo.'}
+var PROF={};
+function pWarn(x){var P=PROF,t=x.t;if(!P.win)return '';
+if((P.win=='7'||P.win=='8')&&x.p=='ps')return 'En tu versión de Windows el PowerShell es antiguo y este comando puede no funcionar. Busca el equivalente en CMD.';
+if(P.win=='7'&&/usoclient|winget|Get-Mp|Update-Mp|Start-Mp|Optimize-Volume/.test(x.c))return 'No existe o funciona distinto en Windows 7. Usa la alternativa en CMD o actualiza el sistema.';
+if(P.dk=='ssd'&&/Desfragmentar/.test(t))return 'Tu disco es SSD: NO lo ejecutes, no sirve y lo desgasta.';
+if(P.dk=='hdd'&&/TRIM/.test(t))return 'Tu disco es mecánico: esto es solo para SSD.';
+if(P.dk=='hdd'&&/SysMain/.test(t))return 'En tu disco mecánico SysMain ayuda: mejor déjalo activo.';
+if(P.eq=='pc'&&/batería/i.test(t))return 'Este comando es para laptops.';
+if(P.eq=='lap'&&/alto rendimiento/i.test(t))return 'En laptop gasta más batería.';
+return ''}
+function render(){var q=$('q').value.toLowerCase(),L=$('list');L.textContent='';$('warn').textContent=WARN[view];lvBar();
+var list=C.filter(function(x){return x.p==view&&(!lvf||x.l==lvf)&&(tag=='Todos'||x.g.indexOf(tag)>-1)&&(x.t+' '+x.n+' '+x.g.join(' ')).toLowerCase().indexOf(q)>-1});
+list.sort(function(a,b){return (tag=='Todos'?CO(a.g[0])-CO(b.g[0]):0)||a.l-b.l});
+var last='';
+list.forEach(function(x){if(tag=='Todos'&&x.g[0]!=last){last=x.g[0];var h=el('h2',0,last+'  ('+list.filter(function(y){return y.g[0]==last}).length+')');h.style.cssText='font-size:1.15rem;margin:18px 0 4px;border-bottom:2px solid var(--ac)';L.appendChild(h)}
+var d=el('div','card k-'+x.k),top=el('div','row');top.appendChild(el('span','where '+x.p,'▶ '+(x.p=='ps'?'POWERSHELL':'CMD')+(x.a?' · COMO ADMIN':' · NORMAL')));top.appendChild(el('span','badge r-'+x.k,x.k=='seguro'?'✔ Seguro':x.k=='medio'?'● Riesgo medio':'▲ Con cuidado'));top.appendChild(el('span','lvl l'+x.l,LV[x.l]));d.appendChild(top);
+var h3=el('h3',0,x.t);h3.style.marginTop='8px';d.appendChild(h3);d.appendChild(el('p','note',x.n));d.appendChild(el('pre',0,x.c));
+if(x.k!='seguro')d.appendChild(el('div','warn','⚠ Por qué tiene riesgo: '+reason(x)));d.appendChild(howTo(x));
+var pw=pWarn(x);if(pw){var w=el('div','warn','Para tu equipo: '+pw);w.style.borderLeftColor='var(--bad)';d.appendChild(w)}
+var r=el('div','row');x.g.forEach(function(g){r.appendChild(el('span','tag',g))});var b=el('button','cp','Copiar');b.onclick=function(){copy(x.c,b)};r.appendChild(b);d.appendChild(r);L.appendChild(d)});
+if(!L.firstChild)L.appendChild(el('p','note','No hay resultados.'))}
+function goCat(v,c){show(v);tag=c;chips();render();window.scrollTo(0,0)}
+// Bloatware por version
+var B11=[['Widgets (panel de noticias)','MicrosoftWindows.Client.WebExperience',1],['Dev Home','Microsoft.Windows.DevHome',1],['Familia de Microsoft','MicrosoftCorporationII.MicrosoftFamily',1],['Outlook nuevo','Microsoft.OutlookForWindows',0],['Chat de Teams (Windows 11)','MicrosoftTeams',0]],B10=[['OneNote (app de la tienda)','Microsoft.Office.OneNote',1]],BL=B;
+function bBuild(){BL=B.concat($('bver').value=='w11'?B11:B10);var L=$('blist');L.textContent='';BL.forEach(function(b){var d=el('label','bi'),c=el('input');c.type='checkbox';c.value=b[1];c.checked=!!b[2];c.onchange=bGen;d.appendChild(c);d.appendChild(el('span',0,b[0]+(b[2]?'':' (opcional)')));L.appendChild(d)});bGen()}
+function bSet2(f){document.querySelectorAll('#blist input').forEach(function(i,k){i.checked=f(k)});bGen()}
+$('bsafe').onclick=function(){bSet2(function(k){return !!BL[k][2]})};$('bnone').onclick=function(){bSet2(function(){return false})};$('ball').onclick=function(){bSet2(function(){return true})};$('bver').onchange=bBuild;bBuild();
+function howTo(x){var D=el('details'),S=el('summary',0,'Cómo usarlo y recomendaciones'),o=el('ol'),ps=x.p=='ps',li=function(t){o.appendChild(el('li',0,t))};S.style.cssText='cursor:pointer;color:var(--ac);font-size:.9rem;margin:4px 0';D.appendChild(S);
+li(ps?(x.a?'Clic derecho en Inicio → Terminal (Administrador) o Windows PowerShell (Administrador).':'Clic derecho en Inicio → Terminal o Windows PowerShell.'):(x.a?'Presiona Win, escribe cmd, clic derecho → Ejecutar como administrador.':'Presiona Win+R, escribe cmd y Enter.'));
+li('Copia el comando con el botón Copiar y pégalo con clic derecho (o Ctrl+V). Si tiene varias líneas, pégalas todas y presiona Enter.');
+if(/NOMBRE|nombre\.exe|chrome|\b[DE]:|origen|Wi-Fi/.test(x.c))li('Cambia el texto de ejemplo (nombre del programa, letra de unidad, ruta o red) por el tuyo antes de presionar Enter.');
+li('Espera a que vuelva el cursor antes de cerrar la ventana.'+(/reinici/i.test(x.n+(x.r||''))?' Guarda tu trabajo: puede pedir reiniciar.':''));
+li(x.k=='seguro'?'Recomendación: riesgo bajo, puedes usarlo cuando lo necesites.':x.k=='medio'?'Recomendación: crea antes un punto de restauración (etiqueta Seguridad, PowerShell) y lee el riesgo de arriba.':'Recomendación: solo si entiendes el resultado. Respalda tus archivos y revisa nombre o letra de disco antes de Enter. Si dudas, no lo ejecutes.');
+if(x.l==1)li('Nivel básico: buen punto para empezar.');D.appendChild(o);return D}
+function lvBar(){var B=$('lvs');B.textContent='';[['Todos los niveles',0],['Básico',1],['Intermedio',2],['Avanzado',3]].forEach(function(l){var b=el('button','chip',l[0]);b.setAttribute('aria-pressed',lvf==l[1]);b.onclick=function(){lvf=l[1];render()};B.appendChild(b)});
+var P=$('pbar');P.textContent='';var d=el('div','pb');
+if(PROF.win){d.appendChild(el('span',0,'Tu equipo: '+(PROF.eq=='lap'?'Laptop':'PC')+' · Windows '+PROF.win+' · '+(PROF.dk=='ssd'?'SSD':PROF.dk=='hdd'?'HDD':'disco ?')+' (avisos activos)'));var r=el('button',0,'Reiniciar perfil');r.onclick=function(){resetAll();show('mi')};d.appendChild(r)}
+else{d.appendChild(el('span',0,'Sin perfil: elige PC/laptop, Windows y disco para recibir avisos de qué NO te conviene.'));var g=el('button',0,'Elegir mi equipo');g.onclick=function(){show('mi')};d.appendChild(g)}
+P.appendChild(d)}
+var OP={ver:'Muestra el número de versión de Windows (ej. 10.0.19045).',systeminfo:'Tarda unos segundos. Incluye fecha de instalación, RAM, parches y tiempo encendido. Útil para soporte técnico.',hostname:'Nombre con el que tu PC aparece en la red.',whoami:'/groups muestra grupos y /priv los privilegios (sirve para saber si eres administrador).',set:'Muestra variables como %TEMP% y %USERPROFILE%.',dir:'/a muestra ocultos, /s incluye subcarpetas, /o:s ordena por tamaño.',cd:'cd .. sube un nivel; cd /d D:\\ cambia también de unidad.',mkdir:'Crea carpetas; puede crear varios niveles a la vez.',rd:'Solo borra carpetas vacías.',copy:'Copia uno o varios archivos; /y sobrescribe sin preguntar.',xcopy:'/E incluye subcarpetas, /I asume que el destino es carpeta, /D copia solo lo nuevo.',robocopy:'El más fiable para respaldos: reintenta si falla. /L solo simula, /Z permite reanudar, /MT:8 usa varios hilos.',move:'Mueve o renombra; no deja copia en el origen.',ren:'Cambia el nombre; no mueve de carpeta.',del:'/p pide confirmar cada archivo, /q no pregunta, /s incluye subcarpetas.',type:'Muestra texto en pantalla; con | more se pagina.',tree:'/f incluye los archivos.',attrib:'+h oculta, -h muestra, +r solo lectura, +s sistema.',findstr:'/i ignora mayúsculas, /s busca en subcarpetas, /n muestra el número de línea.',chkdsk:'/f repara errores lógicos y /r busca sectores dañados. En C: pide reiniciar.',defrag:'/O elige TRIM o desfragmentar según el disco, /A solo analiza.',diskpart:'Es un intérprete: escribe list disk, select disk N y luego sus comandos. clean borra todo el disco elegido.',format:'/q formato rápido, /fs:ntfs elige el sistema de archivos.',fsutil:'Sirve para ver espacio libre, estado de TRIM y ajustes del sistema de archivos.',cipher:'/w sobrescribe el espacio libre; /e cifra carpetas.',ping:'-t continuo, -n 10 envía 10 pruebas. Si dice tiempo de espera agotado, no hay respuesta.',ipconfig:'/all detalle, /release suelta la IP, /renew pide otra, /flushdns limpia la caché DNS.',tracert:'Cada línea es un salto; si se corta en uno, el problema está ahí.',nslookup:'Si resuelve la IP pero la web no abre, el problema no es el DNS.',netstat:'-a todas, -n números, -o PID del proceso. Combínalo con tasklist para saber qué programa es.',netsh:'Ej.: netsh wlan show profiles lista tus redes Wi-Fi.',tasklist:'/svc muestra servicios por proceso, /fi filtra.',taskkill:'/im por nombre, /pid por número, /f fuerza, /t cierra procesos hijos.',sc:'sc query estado, sc stop o sc start, sc config nombre start= disabled lo desactiva.',shutdown:'/s apaga, /r reinicia, /t segundos de espera, /a cancela.',schtasks:'/query lista, /create crea, /delete borra.',sfc:'/scannow repara; /verifyonly solo revisa. Corre como administrador.',DISM:'Orden recomendado: sfc, luego DISM /RestoreHealth, luego sfc otra vez. Necesita internet.',powercfg:'/batteryreport batería, /energy eficiencia, /requests qué impide suspender, /lastwake qué lo despertó.',reg:'export respalda, add agrega, delete borra. Respalda siempre antes de modificar.',gpupdate:'Aplica directivas de grupo sin reiniciar.',mdsched:'Reinicia para probar la RAM; el resultado sale al volver a Windows.',icacls:'/grant da permisos y /reset los restaura.',takeown:'/f archivo toma propiedad; /r lo hace en todo el contenido.'};
+var dtag='Todos',UM={ver:'ver',systeminfo:'systeminfo | findstr /i "Total"',hostname:'hostname',whoami:'whoami /groups',dir:'dir /a C:\\Users',cd:'cd C:\\Users   (cd .. sube un nivel)',mkdir:'mkdir D:\\Respaldo',rd:'rd D:\\CarpetaVacia',copy:'copy archivo.txt D:\\',xcopy:'xcopy C:\\Docs D:\\Docs /E /I',robocopy:'robocopy C:\\Docs D:\\Docs /E',move:'move a.txt D:\\',ren:'ren viejo.txt nuevo.txt',del:'del /p archivo.txt   (/p pide confirmar)',type:'type notas.txt',findstr:'findstr /i "error" log.txt',tree:'tree C:\\Users /f',attrib:'attrib +h secreto.txt',where:'where python',chkdsk:'chkdsk C: /f',defrag:'defrag C: /O',diskpart:'diskpart\nlist disk\nselect disk 1\ndetail disk',format:'format D: /q',fsutil:'fsutil volume diskfree C:',cipher:'cipher /w:C:\\',cleanmgr:'cleanmgr /sageset:1',ping:'ping google.com',ipconfig:'ipconfig /all',tracert:'tracert google.com',nslookup:'nslookup google.com',netstat:'netstat -ano',arp:'arp -a',route:'route print',netsh:'netsh wlan show profiles',getmac:'getmac /v',tasklist:'tasklist | findstr /i chrome',taskkill:'taskkill /im chrome.exe   (sin /f deja guardar)',sc:'sc query wuauserv',shutdown:'shutdown /r /t 60   (/a cancela)',schtasks:'schtasks /query /fo table',sfc:'sfc /scannow',DISM:'DISM /Online /Cleanup-Image /RestoreHealth',bcdedit:'bcdedit /enum',reg:'reg export HKCU respaldo.reg /y',gpupdate:'gpupdate /force',powercfg:'powercfg /batteryreport',mdsched:'mdsched',wevtutil:'wevtutil qe System /c:5 /f:text',net:'net user',icacls:'icacls C:\\Carpeta',takeown:'takeown /f archivo.txt'};
+var DIC=[['Información',['ver|Versión de Windows','systeminfo|Datos completos del equipo','hostname|Nombre del equipo','whoami|Usuario actual','set|Variables de entorno','winver|Ventana de versión','msinfo32|Hardware y software en detalle','driverquery|Drivers instalados']],
+['Archivos y carpetas',['dir|Lista archivos (dir /a muestra ocultos)','cd|Cambia de carpeta','mkdir|Crea una carpeta','rd|Borra una carpeta vacía','!rd /s /q|Borra carpeta con todo su contenido|No pide confirmación y no usa papelera','copy|Copia archivos','xcopy|Copia carpetas con subcarpetas','robocopy|Copia robusta con reintentos','!robocopy /MIR|Espejo de carpetas|Borra en destino lo que no esté en origen','move|Mueve archivos','ren|Renombra','!del|Borra archivos|No va a la papelera','type|Muestra un archivo de texto','tree|Dibuja el árbol de carpetas','attrib|Cambia atributos (oculto, solo lectura)','findstr|Busca texto en archivos','fc|Compara dos archivos','where|Ubica un ejecutable','mklink|Crea enlaces simbólicos','cls|Limpia la pantalla']],
+['Disco',['chkdsk|Revisa errores del disco','defrag|Optimiza o desfragmenta','!diskpart|Particiones y discos|clean o format borran el disco entero sin preguntar','!format|Formatea una unidad|Borra todo su contenido','!convert|FAT32 a NTFS|No se puede revertir sin formatear','label|Cambia el nombre del volumen','fsutil|Utilidades avanzadas del sistema de archivos','cipher|Cifra o limpia el espacio libre','compact|Comprime archivos NTFS','cleanmgr|Liberador de espacio','manage-bde|Estado de BitLocker']],
+['Red',['ping|Prueba conexión','ipconfig|Configuración IP (/flushdns limpia DNS)','tracert|Ruta hasta un destino','pathping|Ping y ruta combinados','nslookup|Consulta DNS','netstat|Conexiones y puertos','arp|Tabla de equipos locales','route|Tabla de rutas','netsh|Configuración avanzada de red y firewall','!netsh winsock reset|Reinicia la pila de red|Borra ajustes de VPN y firewalls de terceros','getmac|Dirección MAC','nbtstat|Nombres NetBIOS','net use|Unidades de red','curl|Descarga o prueba URLs']],
+['Procesos y servicios',['tasklist|Lista procesos','!taskkill|Cierra procesos|/f cierra sin guardar; con procesos del sistema puede dar pantalla azul','sc|Control de servicios','net start / net stop|Inicia o detiene servicios','schtasks|Tareas programadas','shutdown|Apaga, reinicia o programa (/a cancela)','start|Abre un programa o archivo','runas|Ejecuta como otro usuario','wmic|Consultas del sistema (obsoleto en Windows 11)']],
+['Sistema y reparación',['sfc|Repara archivos del sistema','DISM|Repara la imagen de Windows','!bcdedit|Configuración de arranque|Un error puede impedir que Windows inicie','!bootrec|Repara el arranque|Solo desde recuperación; puede quitar sistemas del menú','!reg|Edita el registro|Una clave mal borrada puede dañar Windows; respalda antes','gpupdate|Aplica directivas de grupo','gpresult|Directivas aplicadas','powercfg|Energía, batería e hibernación','mdsched|Diagnóstico de memoria','wevtutil|Registros de eventos','assoc|Asociaciones de archivo','msconfig|Arranque y servicios','!verifier|Verificador de drivers|Puede causar pantallas azules en bucle']],
+['Usuarios y permisos',['net user|Cuentas locales','net localgroup|Grupos locales','cmdkey|Credenciales guardadas','!icacls|Permisos de archivos|Cambios masivos pueden bloquearte el acceso','!takeown|Toma la propiedad de archivos|Usado sobre carpetas del sistema puede romper Windows']]];
+function dicR(){var L=$('dlist'),q=$('dq').value.toLowerCase(),C2=$('dchips');L.textContent='';C2.textContent='';['Todos'].concat(DIC.map(function(z){return z[0]})).forEach(function(g){var b=el('button','chip',g);b.setAttribute('aria-pressed',g==dtag);b.onclick=function(){dtag=g;dicR()};C2.appendChild(b)});DIC.forEach(function(s){if(dtag!='Todos'&&s[0]!=dtag)return;var rows=s[1].filter(function(r){return r.toLowerCase().indexOf(q)>-1});if(!rows.length)return;var h=el('h2',0,s[0]);h.style.cssText='font-size:.95rem;margin:18px 0 4px;border-bottom:2px solid var(--ac);text-transform:uppercase;color:var(--ac)';L.appendChild(h);var t=el('table','dc');rows.forEach(function(r){var p=r.split('|'),d=p[0].charAt(0)=='!',tr=el('tr'),b=el('td',0,p[1]);var k=d?p[0].slice(1):p[0],u=UM[k]||UM[k.split(' ')[0]];var o=OP[k]||OP[k.split(' ')[0]];if(o){var od=el('div','note',o);od.style.margin='4px 0 0';b.appendChild(od)}if(d)b.appendChild(el('div','dg','⚠ Peligro: '+p[2]+'. Recomendación: respalda antes y revisa dos veces la ruta o la letra de la unidad.'));if(u){var pr=el('pre',0,u);pr.style.cssText='margin:4px 0 0;font-size:12px';b.appendChild(pr)}var nm=el('td',0,k),cp=el('button','cp','Copiar'),cx=u||k,tdc=el('td');nm.style.cursor='pointer';nm.title='Clic para copiar';nm.onclick=function(){copy(cx,cp)};cp.style.margin='0';cp.onclick=function(){copy(cx,cp)};tdc.appendChild(cp);tr.appendChild(nm);tr.appendChild(b);tr.appendChild(tdc);t.appendChild(tr)});L.appendChild(t)})}
+$('dq').oninput=dicR;
+
+// Páginas interesantes
+var WC=["Imágenes e IA","Texto y lectura","Archivos","Privacidad y seguridad","Salud y cálculo","Curiosidades","Diversión","Mejorar PC","Sistemas y Linux","Documentos y PDF","Otras"];
+var WM={"Imágenes e IA":["🖼️",265],"Texto y lectura":["📝",200],"Archivos":["📦",28],"Privacidad y seguridad":["🛡️",150],"Salud y cálculo":["❤️",350],"Curiosidades":["🔎",175],"Diversión":["🎉",305],"Mejorar PC":["🚀",225],"Sistemas y Linux":["🐧",90],"Documentos y PDF":["📄",50],"Otras":["📌",0]};
+var W=[
+{n:"TinEye",l:"https://tineye.com/",c:"Imágenes e IA",e:"🔎",d:"Búsqueda inversa de imágenes: sube una foto y encuentra dónde más aparece en internet y su fuente original.",k:"imagen foto buscar origen inversa fuente robada falsa original encontrar donde aparece reverse"},
+{n:"ZeroGPT · Detector de imágenes IA",l:"https://www.zerogpt.com/ai-image-detector",c:"Imágenes e IA",e:"🤖",d:"Analiza una imagen y estima si fue generada por inteligencia artificial.",k:"imagen foto ia detectar falsa generada artificial inteligencia real verdadera"},
+{n:"Img Upscaler",l:"https://imgupscaler.com/",c:"Imágenes e IA",e:"🖼️",d:"Aumenta la resolución y mejora la nitidez de fotos pequeñas o borrosas usando IA.",k:"imagen foto mejorar calidad ampliar agrandar resolucion nitidez borrosa pixelada hd"},
+{n:"waifu2x (DeepAI)",l:"https://deepai.org/machine-learning-model/waifu2x",c:"Imágenes e IA",e:"🎨",d:"Amplía y limpia imágenes tipo anime o ilustraciones con IA, reduciendo el ruido y manteniendo los bordes nítidos.",k:"imagen anime dibujo ilustracion ampliar agrandar mejorar calidad ia ruido escalar upscale"},
+{n:"DupliChecker",l:"https://www.duplichecker.com/es",c:"Texto y lectura",e:"📝",d:"Revisa si un texto es plagio o está duplicado en la web; también ofrece otras herramientas de texto.",k:"plagio texto duplicado copiado revisar originalidad ensayo tarea"},
+{n:"How Long to Read",l:"https://howlongtoread.com/",c:"Texto y lectura",e:"⏱️",d:"Calcula cuánto tarda en leerse un texto o libro según tu velocidad de lectura.",k:"leer lectura tiempo cuanto tarda texto minutos libro articulo"},
+{n:"Filemail",l:"https://www.filemail.com/",c:"Archivos",e:"📨",d:"Envía archivos grandes por correo o enlace, sin necesidad de crear una cuenta.",k:"enviar archivos grandes compartir mandar pesados transferir gigas sin cuenta"},
+{n:"PDF24 Tools",l:"https://tools.pdf24.org/es/",c:"Documentos y PDF",e:"📄",d:"Herramientas gratuitas en línea para PDF: unir, dividir, comprimir, convertir y más.",k:"pdf unir juntar dividir separar comprimir reducir convertir word editar firmar proteger ocr gratis"},
+{n:"Redact Photo",l:"https://redact.photo/",c:"Privacidad y seguridad",e:"🕶️",d:"Oculta caras, textos y datos sensibles en fotos antes de compartirlas.",k:"ocultar censurar tachar borrar cara datos privados foto difuminar privacidad"},
+{n:"Blacklight (The Markup)",l:"https://themarkup.org/blacklight",c:"Privacidad y seguridad",e:"🔦",d:"Escanea un sitio web y muestra qué rastreadores y técnicas de vigilancia usa.",k:"rastreadores tracking espiar vigilancia cookies privacidad sitio web seguro analizar publicidad"},
+{n:"Experte · Verificador de email",l:"https://www.experte.com/email-verification",c:"Privacidad y seguridad",e:"📧",d:"Comprueba si una dirección de correo existe y es válida, útil para detectar correos falsos o con errores.",k:"correo email verificar valido existe falso comprobar direccion"},
+{n:"Calculadora de IMC",l:"https://www.calculator.net/bmi-calculator.html",c:"Salud y cálculo",e:"⚖️",d:"Calcula tu índice de masa corporal a partir de peso y estatura e indica el rango.",k:"peso imc masa corporal obesidad salud calcular estatura adelgazar"},
+{n:"¿Cuántos se llaman así? (INE)",l:"https://www.ine.es/widgets/nombApell/nombApell.shtml",c:"Curiosidades",e:"👤",d:"Consulta cuántas personas en España tienen un nombre o apellido y su distribución por edad.",k:"nombre apellido cuantas personas espana estadistica curiosidad"},
+{n:"Meme Generator (Imgur)",l:"https://imgur.com/meme-generator",c:"Diversión",e:"😂",d:"Crea memes en línea: elige una plantilla o sube tu imagen y agrega el texto.",k:"meme crear gracioso broma imagen texto plantilla divertido"},
+{n:"Doofy's Projects (DProjects)",l:"https://dprojects.org/",c:"Mejorar PC",e:"🎮",d:"Programas para Windows 10 y 11 pensados para jugar: DELTA optimiza el sistema tras instalarlo (de pago), Asere lanza juegos y muestra FPS, y hay utilidades gratis como StartOne, Krenshot, MonitorHUB y Replay.",k:"juegos gaming gamer optimizar windows fps rendimiento tweaks lanzador captura pantalla menu inicio monitor ram grabar jugadas usb booteable rufus ventoy guias"},
+{n:"WinUtil (Chris Titus)",l:"https://github.com/ChrisTitusTech/winutil",c:"Mejorar PC",e:"🚀",d:"Utilidad gratuita y de código abierto para instalar programas, quitar bloatware, aplicar ajustes y gestionar actualizaciones de Windows desde una sola ventana.",k:"optimizar windows limpiar debloat bloatware tweaks instalar programas actualizaciones rendimiento mejorar pc lento acelerar",m:"irm https://christitus.com/win | iex",w:"Este comando descarga y ejecuta un script. Revisa antes el código en GitHub, crea un punto de restauración y activa solo lo que entiendas.",p:["Clic derecho en Inicio → Terminal (Administrador) o Windows PowerShell (Administrador).","Pega el comando de esta tarjeta (botón Copiar comando) y presiona Enter.","Se abre la ventana de WinUtil: usa sus pestañas para instalar programas, ajustes y actualizaciones.","Antes de aplicar ajustes, crea un punto de restauración y marca solo lo que entiendas."]},
+{n:"NVCleanstall (TechPowerUp)",l:"https://www.techpowerup.com/download/techpowerup-nvcleanstall/",c:"Mejorar PC",e:"🧩",d:"Instala drivers NVIDIA personalizados: eliges qué componentes incluir y quitas telemetría y extras innecesarios.",k:"nvidia driver controlador instalar limpio liviano grafica gpu tarjeta telemetria actualizar"},
+{n:"Display Driver Uninstaller (DDU)",l:"https://www.wagnardsoft.com/display-driver-uninstaller-ddu",c:"Mejorar PC",e:"🧹",d:"Desinstala por completo los drivers de la tarjeta gráfica (NVIDIA, AMD, Intel) para reinstalarlos limpios y resolver fallos.",k:"desinstalar driver controlador grafica nvidia amd intel limpiar pantalla negra errores reinstalar gpu",w:"Se recomienda usarlo en Modo seguro y tener a mano el instalador del driver nuevo antes de empezar."},
+{n:"Batocera",l:"https://batocera.org/download",c:"Sistemas y Linux",e:"🕹️",d:"Sistema gratuito que convierte un PC, mini PC o Raspberry Pi en una consola retro con emuladores listos. Se ejecuta desde un USB o SD sin tocar tu Windows.",k:"retro emuladores juegos consolas roms arcade sistema operativo usb crear pendrive consola nintendo sega playstation",w:"Grabar la imagen borra todo el contenido del USB o la tarjeta SD. Copia antes lo que necesites.",p:["Entra a batocera.org/download, elige tu equipo (PC x86_64, Raspberry Pi u otra placa) y descarga la imagen.","Prepara un USB o tarjeta SD de 8 GB o más (se borrará por completo).","Instala balenaEtcher (o Rufus en modo DD) en tu PC con Windows.","Abre Etcher: elige la imagen descargada, elige tu USB o SD y presiona Flash.","Con el USB puesto, reinicia el PC y entra al menú de arranque (F12, F10, Esc o Supr según la marca). Elige el USB. Si no arranca, revisa Secure Boot en la BIOS.","En el primer inicio Batocera prepara su partición de datos. Después copia tus ROMs y BIOS a la carpeta share (también visible por red como \\\\BATOCERA)."]},
+{n:"DistroSea",l:"https://distrosea.com/es/",c:"Sistemas y Linux",e:"🐧",d:"Prueba distribuciones de Linux directamente en el navegador, sin instalar nada ni usar máquina virtual.",k:"linux probar distro distribucion navegador virtual sin instalar ubuntu fedora debian online maquina virtual"}
+];
+var webs=[];try{webs=JSON.parse(localStorage.getItem("webs")||"[]")}catch(e){}
+var wHid=[];try{wHid=JSON.parse(localStorage.getItem("whid")||"[]")}catch(e){}
+function saveH(){try{localStorage.setItem("whid",JSON.stringify(wHid))}catch(e){}}
+var wtag="Todas";
+function saveW(){try{localStorage.setItem("webs",JSON.stringify(webs))}catch(e){}}
+function wCats(){var s=WC.slice();webs.forEach(function(w){if(s.indexOf(w.c)<0)s.push(w.c)});return s}
+function wHue(c){if(WM[c])return WM[c][1];var h=0;for(var i=0;i<c.length;i++)h=(h*31+c.charCodeAt(i))%360;return h}
+function wCol(c){return c=="Otras"?"hsl(220 8% 45%)":"hsl("+wHue(c)+" 60% 42%)"}
+function wEm(c){if(WM[c])return WM[c][0];for(var i=0;i<webs.length;i++)if(webs[i].c==c&&webs[i].e)return webs[i].e;return "📌"}
+function wHost(l){try{return new URL(l).hostname.replace(/^www\./,"")}catch(e){return ""}}
+function wForm(){var S=$("wc"),cur=S.value;S.textContent="";wCats().forEach(function(c){var o=el("option",0,c);o.value=c;S.appendChild(o)});var n=el("option",0,"➕ Nueva categoría...");n.value="__n";S.appendChild(n);if(cur&&Array.prototype.some.call(S.options,function(o){return o.value==cur}))S.value=cur;$("wcnb").classList.toggle("hid",S.value!="__n")}
+// Búsqueda por intención
+var STOP=("de la el en un es se lo al me mi tu su y o a que quiero hacer como para una uno unos unas los las del con por mis mas mejor necesito puedo pagina sitio web algo esto esta este desde hasta sobre entre donde cuando cual quien ver usar buscar").split(" ");
+function nzw(s){return String(s||"").toLowerCase().normalize("NFD").replace(/[\u0300-\u036f]/g,"").replace(/[^a-z0-9]+/g," ")}
+var SYN=[[/^(arregl|repar|restaur|retoc|corrig|aclar|enfoc)/,"mejorar calidad nitidez borrosa restaurar"],[/^(borros|pixel|desenfoc)/,"borrosa pixelada nitidez calidad ampliar mejorar"],[/^(agrand|amplia|escal)/,"ampliar agrandar resolucion upscale"],[/^(fotos|imagenes|fotografia|picture)/,"foto imagen"],[/^(descarg|bajar)/,"descargar archivo"],[/^(comprim|reduc)/,"comprimir reducir archivo"]];
+function wTok(q){var T=[];nzw(q).split(" ").filter(function(t){return t.length>1&&STOP.indexOf(t)<0}).forEach(function(t){T.push(t);SYN.forEach(function(r){if(r[0].test(t))r[1].split(" ").forEach(function(x){if(T.indexOf(x)<0)T.push(x)})})});return T}
+function wHit(f,t){if(t.length<=3)return(" "+f+" ").indexOf(" "+t+" ")>-1;var st=t.length>5?t.slice(0,5):t;return f.indexOf(st)>-1}
+function wScore(x,T){var n=nzw(x.n),k=nzw(x.k||""),d=nzw(x.d),c=nzw(x.c),s=0;T.forEach(function(t){if(wHit(n,t))s+=3;if(wHit(k,t))s+=3;if(wHit(d,t))s+=1;if(wHit(c,t))s+=1});return s}
+// Detección automática por dirección
+var WR=[[/\b(driver|nvidia|amd|gpu|optimi|tweak|debloat|cleaner|winutil|fps|ddu)/,"Mejorar PC"],[/\b(linux|distro|ubuntu|debian|fedora|iso|retro|emulat|rom|boot)/,"Sistemas y Linux"],[/\b(pdf|docum|excel|ocr|convert)/,"Documentos y PDF"],[/\b(meme|humor|juego|game|divert)/,"Diversión"],[/\b(image|img|foto|photo|picture|upscal|waifu|logo)|\bai\b/,"Imágenes e IA"],[/\b(privacy|privacidad|vpn|security|seguridad|tracker|mail|email|password|clave|antivirus|malware)/,"Privacidad y seguridad"],[/\b(file|archivo|transfer|send|share|upload|drive|zip|storage|cloud)/,"Archivos"],[/\b(calc|bmi|imc|health|salud|calorie|fitness|medic)/,"Salud y cálculo"],[/\b(text|read|plagi|grammar|translat|traduc|dictionar|write)/,"Texto y lectura"]];
+function wGuess(url){var u;try{u=new URL(/^https?:\/\//i.test(url)?url:"https://"+url)}catch(e){return null}
+var host=u.hostname.replace(/^www\./,""),path=u.pathname.replace(/\/+$/,""),norm=host+path;if(host.indexOf(".")<0)return null;
+var all=W.concat(webs),kn=null;all.forEach(function(w){var wn=wHost(w.l)+(function(){try{return new URL(w.l).pathname.replace(/\/+$/,"")}catch(e){return ""}})();if(wn==norm||(host!="github.com"&&wHost(w.l)==host))kn=w});
+if(kn)return{dup:true,n:kn.n,c:kn.c,e:kn.e||wEm(kn.c),d:kn.d||""};
+var seg=path.split("/").filter(Boolean),nm;
+if(host=="github.com"&&seg.length)nm=seg[1]||seg[0];else{var p=host.split(".");nm=p.length>2&&/^(com|co|org|net|gob|edu)$/.test(p[p.length-2])?p[p.length-3]:p[p.length-2]}
+nm=String(nm||host).replace(/[-_]+/g," ");nm=nm.charAt(0).toUpperCase()+nm.slice(1);
+var cat="Otras",txt=nzw(host+" "+path);for(var i=0;i<WR.length;i++)if(WR[i][0].test(txt)){cat=WR[i][1];break};if(cat=="Otras")[["pdf","Documentos y PDF"],["image","Imágenes e IA"],["photo","Imágenes e IA"],["driver","Mejorar PC"],["linux","Sistemas y Linux"]].forEach(function(p){if(cat=="Otras"&&txt.indexOf(p[0])>-1)cat=p[1]})
+return{dup:false,n:nm,c:cat,e:wEm(cat),d:""}}
+function wAuto(){var l=$("wl").value.trim(),nt=$("wauto");var g=l?wGuess(l):null;if(!g){nt.classList.add("hid");return}nt.classList.remove("hid");
+if(g.dup){nt.textContent="ℹ️ Esa página ya está en tu lista: «"+g.n+"» ("+g.c+").";return}
+nt.textContent="✨ Detectado automáticamente a partir de la dirección. Revisa y corrige si hace falta.";
+[["wn",g.n],["we",g.e],["wd",g.d]].forEach(function(p){if(!$(p[0]).dataset.t)$(p[0]).value=p[1]});
+if(!$("wc").dataset.t){wForm();$("wc").value=g.c;$("wcnb").classList.add("hid")}}
+function wCard(x,best){var c=el("div","wcard");c.style.setProperty("--cc",wCol(x.c));var t=el("div","wtop");t.appendChild(el("div","wic",x.e||wEm(x.c)));var tt=el("div");tt.appendChild(el("h3",0,x.n));var dm=wHost(x.l);if(dm)tt.appendChild(el("div","wdom",dm));t.appendChild(tt);c.appendChild(t);
+if(best)c.appendChild(el("span","wbest","⭐ Mejor opción"));
+if(x.u>-1)c.appendChild(el("span","wbadge","Agregada por ti"));
+if(x.d)c.appendChild(el("p","wsum",x.d));
+if(x.w)c.appendChild(el("div","wwarn","⚠ "+x.w));
+if(x.m)c.appendChild(el("pre",0,x.m));
+if(x.p){var D=el("details","wsteps");D.appendChild(el("summary",0,"📋 Ver pasos"));var ol=el("ol");x.p.forEach(function(p){ol.appendChild(el("li",0,p))});D.appendChild(ol);c.appendChild(D)}
+var r=el("div","wact");
+if(/^https?:\/\//i.test(x.l)){var a=el("a","lk","Abrir ↗");a.href=x.l;a.target="_blank";a.rel="noopener noreferrer";r.appendChild(a);var cb=el("button",0,"Copiar enlace");cb.onclick=function(){copy(x.l,cb)};r.appendChild(cb)}
+if(x.m){var mb=el("button",0,"Copiar comando");mb.onclick=function(){copy(x.m,mb)};r.appendChild(mb)}
+var rm=el("button","wx","✕");rm.title="Quitar esta página";rm.setAttribute("aria-label","Quitar");rm.onclick=function(){if(x.u>-1){webs.splice(x.u,1);saveW()}else{wHid.push(x.l);saveH()}rWeb()};c.appendChild(rm);
+c.appendChild(r);return c}
+function rWeb(){wForm();var L=$("wlist"),q=$("wq").value.trim(),C2=$("wchips"),cats=wCats();L.textContent="";C2.textContent="";
+if(cats.indexOf(wtag)<0&&wtag!="Todas")wtag="Todas";
+var all=W.filter(function(w){return wHid.indexOf(w.l)<0}).map(function(w){var o={};for(var k in w)o[k]=w[k];o.u=-1;return o}).concat(webs.map(function(w,i){return{n:w.n,l:w.l,c:w.c,d:w.d,e:w.e,k:w.k,u:i}}));
+var EX=$("wex");EX.textContent="";["Enviar un archivo grande","Mejorar una foto","Pasar PDF a Word","Probar Linux sin instalar","Limpiar drivers de la gráfica"].forEach(function(t){var b=el("button","chip","💡 "+t);b.onclick=function(){$("wq").value=t;rWeb()};EX.appendChild(b)});if(wHid.length){var rs=el("button","chip","↩ Restaurar "+wHid.length+" quitada"+(wHid.length==1?"":"s"));rs.onclick=function(){wHid=[];saveH();rWeb()};EX.appendChild(rs)}
+function tile(name,ic,cnt,col,key){var b=el("button","wt");b.setAttribute("aria-pressed",!q&&key==wtag);if(col)b.style.setProperty("--cc",col);b.appendChild(el("span","ic",ic));b.appendChild(el("b",0,name));b.appendChild(el("small",0,cnt+(cnt==1?" página":" páginas")));b.onclick=function(){wtag=key;$("wq").value="";rWeb()};C2.appendChild(b)}
+tile("Todas","🗂️",all.length,"","Todas");
+cats.forEach(function(c){var n=all.filter(function(x){return x.c==c}).length;if(n)tile(c,wEm(c),n,wCol(c),c)});
+if(q){var T=wTok(q);var sc=all.map(function(x){return{x:x,s:wScore(x,T)}}).filter(function(r){return r.s>0}).sort(function(a,b){return b.s-a.s});
+L.appendChild(el("h2","wsug","💡 Páginas que puedes usar para: «"+q+"» ("+Math.min(sc.length,9)+")"));
+if(!sc.length){L.appendChild(el("p","note","No encontré una página para eso. Prueba con otras palabras (por ejemplo: foto, pdf, archivo, driver, linux) o agrégala arriba con ➕."));return}
+var g=el("div","wg");sc.slice(0,9).forEach(function(r,i){g.appendChild(wCard(r.x,i==0))});L.appendChild(g);return}
+cats.forEach(function(c){if(wtag!="Todas"&&c!=wtag)return;var rows=all.filter(function(x){return x.c==c});if(!rows.length)return;
+var sec=el("div");sec.style.setProperty("--cc",wCol(c));var h=el("h2","wh");h.appendChild(el("span",0,wEm(c)));h.appendChild(document.createTextNode(c));h.appendChild(el("small",0,rows.length+(rows.length==1?" página":" páginas")));sec.appendChild(h);
+var g=el("div","wg");rows.forEach(function(x){g.appendChild(wCard(x,false))});sec.appendChild(g);L.appendChild(sec)})}
+["wn","wd","we","wc"].forEach(function(id){["input","change"].forEach(function(ev){$(id).addEventListener(ev,function(){this.dataset.t="1"})})});
+$("wc").addEventListener("change",function(){$("wcnb").classList.toggle("hid",$("wc").value!="__n")});
+["input","change"].forEach(function(ev){$("wl").addEventListener(ev,wAuto)});
+$("wq").oninput=rWeb;
+$("wadd").onclick=function(){var n=$("wn").value.trim(),l=$("wl").value.trim(),c=$("wc").value;if(c=="__n")c=$("wcn").value.trim();if(!n||!c)return;if(l&&!/^https?:\/\//i.test(l))l="https://"+l;
+webs.push({n:n,l:l,c:c,d:$("wd").value.trim(),e:$("we").value.trim()});saveW();["wn","wl","wd","wcn","we"].forEach(function(i){$(i).value=""});["wn","wd","we","wc"].forEach(function(i){delete $(i).dataset.t});$("wauto").classList.add("hid");wtag=c;$("wq").value="";rWeb();$("wc").value=c;$("wcnb").classList.add("hid")};
+
+// ===== Añadir varias URL: lee la página y la organiza sola =====
+function wUrls(t){var out=[],seen={};String(t||"").split(/[\s,;]+/).forEach(function(x){x=x.replace(/^[<("'\[]+|[>)"'\].]+$/g,"");if(!x)return;var u=/^https?:\/\//i.test(x)?x:"https://"+x;try{var o=new URL(u);if(o.hostname.indexOf(".")<0)return;u=o.href}catch(e){return}if(!seen[u]){seen[u]=1;out.push(u)}});return out}
+function wFetch(u){return new Promise(function(res){var done=false;function fin(v){if(!done){done=true;clearTimeout(tm);res(v)}}var tm=setTimeout(function(){fin(null)},9000);
+try{fetch("https://api.microlink.io/?url="+encodeURIComponent(u)).then(function(r){return r.json()}).then(function(j){fin(j&&j.status=="success"?j.data:null)}).catch(function(){fin(null)})}catch(e){fin(null)}})}
+function wTitle(t){t=String(t||"").trim();if(!t||/just a moment|access denied|attention required|are you a robot|403|404|not found|cloudflare|^home$|^inicio$/i.test(t))return "";var parts=t.split(/\s+[|–—·•:-]\s+/).filter(function(x){return x.length>2});var r=parts.length?parts[0]:t;return r.length>60?r.slice(0,57)+"…":r}
+function wCatTxt(txt){var cat="Otras";for(var i=0;i<WR.length;i++)if(WR[i][0].test(txt)){cat=WR[i][1];break}return cat}
+function wOne(u){var g=wGuess(u);if(!g)return Promise.resolve(null);if(g.dup)return Promise.resolve({dup:true,n:g.n});
+return wFetch(u).then(function(m){var host=wHost(u),path="";try{path=new URL(u).pathname}catch(e){}
+var ti=m?wTitle(m.title):"",de=m&&m.description?String(m.description).replace(/\s+/g," ").trim():"";if(de.length>200)de=de.slice(0,197)+"…";
+var txt=nzw(host+" "+path+" "+ti+" "+de),cat=wCatTxt(txt);if(cat=="Otras")cat=g.c;
+return{ok:true,read:!!(m&&(ti||de)),n:ti||g.n,l:u,c:cat,d:de,e:wEm(cat),k:nzw(ti+" "+de).slice(0,300)}})}
+function wBulk(){var ta=$("wbulk"),st=$("wbst"),list=wUrls(ta.value);if(!list.length){st.textContent="Pega al menos una dirección.";return}
+var btn=$("wbulkgo");btn.disabled=true;st.textContent="🔎 Leyendo "+list.length+(list.length==1?" página...":" páginas...");
+var n=0,Q=list.slice(),R=[];
+function work(){var u=Q.shift();if(!u)return Promise.resolve();return wOne(u).then(function(r){R.push(r);n++;st.textContent="🔎 Leyendo... "+n+" de "+list.length}).then(work)}
+Promise.all([work(),work(),work()]).then(function(){var add=0,dup=0,blind=0,cats={};
+R.forEach(function(r){if(!r)return;if(r.dup){dup++;return}var ex=webs.some(function(w){return w.l==r.l});if(ex){dup++;return}webs.push({n:r.n,l:r.l,c:r.c,d:r.d,e:r.e,k:r.k});add++;cats[r.c]=1;if(!r.read)blind++});
+saveW();ta.value="";btn.disabled=false;wtag="Todas";$("wq").value="";rWeb();
+var cs=Object.keys(cats);st.textContent="✅ "+add+(add==1?" página añadida":" páginas añadidas")+(cs.length?" en: "+cs.join(", "):"")+(dup?" · "+dup+" ya estaba"+(dup==1?"":"n"):"")+(blind?" · "+blind+" no se pudo leer, la clasifiqué por su dirección":"");
+var f=$("wlist");if(add&&f.scrollIntoView)f.scrollIntoView({behavior:"smooth",block:"start"})})}
+$("wbulkgo").onclick=wBulk;
+$("wbulk").addEventListener("paste",function(){setTimeout(function(){if(wUrls($("wbulk").value).length)wBulk()},60)});
+rApps();show('mi');
+</script>
+</body>
+</html>
