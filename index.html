@@ -89,6 +89,8 @@ details.wsteps summary{cursor:pointer;color:var(--cc);font-weight:700;font-size:
 <button class="tab" role="tab" data-v="ini" aria-selected="false">Gestionar inicio</button>
 <button class="tab" role="tab" data-v="apps" aria-selected="false">Apps gratis</button>
 <button class="tab" role="tab" data-v="web" aria-selected="false">Páginas interesantes</button>
+<button class="tab" role="tab" data-v="shop" aria-selected="false">🛍️ Páginas de compras</button>
+<button class="tab" role="tab" data-v="prov" aria-selected="false">📦 Proveedores</button>
 </div>
 </header>
 <main>
@@ -188,6 +190,35 @@ powershell -command "Get-CimInstance Win32_Processor | Select Name"</pre><button
 <p class="note">Se guardan solo en este navegador.</p>
 </details>
 <div id="wlist"></div>
+</section>
+<section id="v-shop" class="hid">
+<p class="note">Elige una página de compras: abajo salen todos sus proveedores por categoría. Los cambios se guardan solo en este navegador.</p>
+<div class="chips" id="shopg"></div>
+<div class="wt-grid" id="shopt"></div>
+<div id="shopp"></div>
+<details class="wadd" open><summary>➕ Añadir proveedor a esta página</summary>
+<div class="grid" style="margin-top:8px">
+<div><label for="sn">Nombre del proveedor</label><input id="sn"></div>
+<div><label for="sl">Enlace de la tienda (opcional)</label><input id="sl" inputmode="url"></div>
+<div><label for="sc">Categoría (iPhones, Relojes…)</label><input id="sc" list="scl"><datalist id="scl"></datalist></div>
+</div>
+<p><button id="sadd" class="cp" style="margin:8px 0 0">Agregar</button></p>
+</details>
+<details class="wadd"><summary>➕ Añadir otra página de compras (nuevo tarjetón)</summary>
+<div class="grid" style="margin-top:8px">
+<div><label for="ppn">Nombre (ej. Banggood)</label><input id="ppn"></div>
+<div><label for="ppl">Enlace de la página</label><input id="ppl" inputmode="url"></div>
+<div><label for="ppe">Icono (emoji, opcional)</label><input id="ppe" maxlength="4"></div>
+<div><label><input id="ppc" type="checkbox" style="width:auto"> Es de China</label></div>
+</div>
+<p><button id="padd" class="cp" style="margin:8px 0 0">Crear tarjetón</button></p>
+</details>
+</section>
+<section id="v-prov" class="hid">
+<input id="pq" type="search" placeholder="🔍 Buscar proveedor, categoría o página: iPhone, perfumes, Crocs…">
+<p class="note" style="margin:8px 0 0">Categoría</p><div class="chips" id="pcat"></div>
+<p class="note" style="margin:8px 0 0">Página de compras</p><div class="chips" id="pplat"></div>
+<div id="plist"></div>
 </section>
 </main>
 
@@ -654,6 +685,71 @@ var f=$("wlist");if(add&&f.scrollIntoView)f.scrollIntoView({behavior:"smooth",bl
 $("wbulkgo").onclick=wBulk;
 $("wbulk").addEventListener("paste",function(){setTimeout(function(){if(wUrls($("wbulk").value).length)wBulk()},60)});
 rApps();show('mi');
+// ===== Compras y proveedores =====
+(function(){
+var PL=[
+{k:"ebay",n:"eBay",e:"🛒",l:"https://www.ebay.com"},
+{k:"mercadolibre",n:"Mercado Libre",e:"🤝",l:"https://www.mercadolibre.com"},
+{k:"amazon",n:"Amazon",e:"📦",l:"https://www.amazon.com/"},
+{k:"jomashop",n:"Jomashop",e:"⌚",l:"https://www.jomashop.com/"},
+{k:"6pm",n:"6pm",e:"👟",l:"https://www.6pm.com/"},
+{k:"stockx",n:"StockX",e:"👞",l:"https://stockx.com/"},
+{k:"ulta",n:"Ulta",e:"💄",l:"https://www.ulta.com/"},
+{k:"shopsimon",n:"Shop Simon",e:"🏬",l:"https://www.google.com/search?q=Shop+Simon+outlet"},
+{k:"aliexpress",n:"AliExpress",e:"🇨🇳",l:"https://www.aliexpress.com",ch:1},
+{k:"alibaba",n:"Alibaba",e:"🏭",l:"https://www.alibaba.com",ch:1},
+{k:"temu",n:"Temu",e:"🎁",l:"https://www.temu.com",ch:1},
+{k:"dhgate",n:"DHgate",e:"🚚",l:"https://www.dhgate.com",ch:1},
+{k:"shein",n:"Shein",e:"👗",l:"https://www.shein.com",ch:1}];
+var E="https://www.ebay.com/str/";
+function s(n,p,c,l){return{n:n,p:p,c:Array.isArray(c)?c:[c],l:l||""}}
+var S=[
+s("Buyback Boss","ebay","iPhones"),s("LTDeals","ebay","iPhones"),s("SuteDevices","ebay","iPhones"),s("ItsWorthMore","ebay",["iPhones","MacBooks"]),
+s("Sigma Cellular","ebay","iPhones",E+"sigmacellular"),s("Direct Auth","ebay","iPhones",E+"directauth"),s("A4C","ebay","iPhones"),s("maxbacksales","ebay","iPhones"),
+s("northbaysell","ebay","MacBooks"),s("VR Assets","ebay","MacBooks"),s("Boundless Macs","ebay","MacBooks"),s("Pacific Macs","ebay","MacBooks",E+"pacificmacs"),
+s("eazytrade84","ebay","iPads",E+"eazytrade84"),s("cellularprofessor","ebay","iPads",E+"cellularprofessor"),s("bytes","ebay","iPads",E+"bytes"),s("discountcomputersandelectronics","ebay","iPads",E+"discountcomputersandelectronics"),
+s("cellfeee","ebay",["Samsung","Tecnología","Relojes"],E+"cellfeee"),s("West Coast Deals (Galaxy A15)","ebay","Samsung","https://www.ebay.com/sch/i.html?_ssn=west.coast.deals&_nkw=samsung%20galaxy%20a15"),
+s("amazingwireless","ebay","Tecnología",E+"amazingwireless"),s("Harman Audio (JBL)","ebay","Tecnología",E+"harmanaudio"),s("dealparade","ebay","Tecnología",E+"dealparade"),
+s("nnpdeals (zapatillas variadas)","ebay","Zapatillas y zapatos",E+"nnpdeals"),s("sneakar (Reebok)","ebay","Zapatillas y zapatos",E+"sneakar"),s("Reebok oficial","ebay","Zapatillas y zapatos",E+"reebok"),
+s("Crocs Outlet","ebay","Zapatillas y zapatos",E+"crocsoutlet"),s("Puma oficial","ebay","Zapatillas y zapatos",E+"theofficialpumastore"),
+s("watcheshalfprice","ebay","Relojes",E+"watcheshalfprice"),s("watchesonline","ebay","Relojes",E+"watchesonline"),
+s("gabysbags","ebay","Carteras",E+"gabysbags"),
+s("Perfume Empire","ebay","Perfumes",E+"perfumeempirefragrancestore"),s("foreverlux","ebay","Perfumes",E+"foreverlux"),s("1perfumes","ebay","Perfumes",E+"1perfumes")];
+function ld(k){try{return JSON.parse(localStorage.getItem(k)||"[]")}catch(e){return[]}}
+function sv(k,v){try{localStorage.setItem(k,JSON.stringify(v))}catch(e){}}
+var cp=ld("cplat"),cs=ld("cprov"),hid=ld("hprov"),cur="ebay",grp="Todas",pc="Todas",pp="Todas";
+var plats=function(){return PL.concat(cp)},sups=function(){return S.filter(function(x){return hid.indexOf(x.p+"|"+x.n)<0}).concat(cs)};
+var pn=function(k){var r=plats().filter(function(p){return p.k==k})[0];return r?r.n:k};
+function fix(u){u=(u||"").trim();return u&&!/^https?:\/\//i.test(u)?"https://"+u:u}
+function link(x){return x.l||(x.p=="ebay"?"https://www.ebay.com/sch/i.html?_nkw=":"https://www.google.com/search?q=")+encodeURIComponent(x.n)}
+function cats(){var o={};sups().forEach(function(x){x.c.forEach(function(c){o[c]=1})});return Object.keys(o)}
+function open(u){window.open(u,"_blank","noopener")}
+function card(x){var d=el("div","card wcard"),t=el("div","wtop");t.appendChild(el("h3",0,x.n));t.appendChild(el("p","note",pn(x.p)+(x.l?"":" · sin enlace directo: abre una búsqueda")));d.appendChild(t);
+var r=el("div","row");x.c.forEach(function(c){r.appendChild(el("span","tag",c))});var b=el("button","cp",x.l?"Abrir":"Buscar");b.onclick=function(){open(link(x))};r.appendChild(b);d.appendChild(r);
+var rm=el("button","wx","✕");rm.title="Quitar";rm.onclick=function(){var i=cs.indexOf(x);if(i>-1){cs.splice(i,1);sv("cprov",cs)}else{hid.push(x.p+"|"+x.n);sv("hprov",hid)}rAll()};d.appendChild(rm);return d}
+function chipRow(box,list,val,fn){box.textContent="";list.forEach(function(g){var b=el("button","chip",g);b.setAttribute("aria-pressed",g==val);b.onclick=function(){fn(g)};box.appendChild(b)})}
+function rShop(){
+chipRow($("shopg"),["Todas","Internacional","China"],grp,function(g){grp=g;rShop()});
+var T=$("shopt");T.textContent="";var P=plats().filter(function(p){return grp=="Todas"||(grp=="China")==!!p.ch});
+P.forEach(function(p){var n=sups().filter(function(x){return x.p==p.k}).length,b=el("button","wt");b.setAttribute("aria-pressed",p.k==cur);b.appendChild(el("span","ic",p.e||"🛍️"));b.appendChild(el("b",0,p.n));b.appendChild(el("small",0,n+(n==1?" proveedor":" proveedores")));b.onclick=function(){cur=p.k;rShop()};T.appendChild(b)});
+var pl=plats().filter(function(p){return p.k==cur})[0]||P[0];if(!pl){return}cur=pl.k;
+var H=$("shopp");H.textContent="";var h=el("h2","wh");h.appendChild(el("span",0,pl.e||"🛍️"));h.appendChild(document.createTextNode(pl.n));var go=el("button","cp","Abrir "+pl.n);go.onclick=function(){open(pl.l)};h.appendChild(go);H.appendChild(h);
+var L=sups().filter(function(x){return x.p==cur});
+if(!L.length)H.appendChild(el("p","note","Aún no hay proveedores aquí. Agrégalos con el formulario de abajo."));
+cats().forEach(function(c){var r=L.filter(function(x){return x.c.indexOf(c)>-1});if(!r.length)return;H.appendChild(el("h3",0,c+" ("+r.length+")"));var g=el("div","wg");r.forEach(function(x){g.appendChild(card(x))});H.appendChild(g)});
+$("sadd").textContent="Agregar a "+pl.n;
+var dl=$("scl");dl.textContent="";cats().forEach(function(c){var o=el("option");o.value=c;dl.appendChild(o)})}
+function rProv(){chipRow($("pcat"),["Todas"].concat(cats()),pc,function(g){pc=g;rProv()});
+chipRow($("pplat"),["Todas"].concat(plats().map(function(p){return p.n})),pp,function(g){pp=g;rProv()});
+var q=$("pq").value.toLowerCase().trim(),L=$("plist");L.textContent="";
+var r=sups().filter(function(x){return(pc=="Todas"||x.c.indexOf(pc)>-1)&&(pp=="Todas"||pn(x.p)==pp)&&(x.n+" "+x.c.join(" ")+" "+pn(x.p)).toLowerCase().indexOf(q)>-1});
+if(!r.length)L.appendChild(el("p","note","No hay resultados."));var g=el("div","wg");r.forEach(function(x){g.appendChild(card(x))});L.appendChild(g)}
+function rAll(){rShop();rProv()}
+$("sadd").onclick=function(){var n=$("sn").value.trim(),c=$("sc").value.trim()||"General";if(!n)return;cs.push({n:n,p:cur,c:[c],l:fix($("sl").value)});sv("cprov",cs);["sn","sl","sc"].forEach(function(i){$(i).value=""});rAll()};
+$("padd").onclick=function(){var n=$("ppn").value.trim(),l=fix($("ppl").value);if(!n||!l)return;var k="c"+Date.now();cp.push({k:k,n:n,l:l,e:$("ppe").value.trim()||"🛍️",ch:$("ppc").checked?1:0});sv("cplat",cp);cur=k;["ppn","ppl","ppe"].forEach(function(i){$(i).value=""});$("ppc").checked=false;rAll()};
+$("pq").oninput=rProv;
+var _s=show;show=function(v){_s(v);$("v-shop").classList.toggle("hid",v!="shop");$("v-prov").classList.toggle("hid",v!="prov");if(v=="shop")rShop();if(v=="prov")rProv()};
+})();
 </script>
 </body>
 </html>
